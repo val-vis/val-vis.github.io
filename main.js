@@ -1,3 +1,4 @@
+/* This script will be executed once page is loaded */
 // html element that holds the chart
 var viz_container;
 
@@ -8,9 +9,11 @@ dataMap.set("2016", "data/test-2016.json");
 
 var currYear="2016";
 var currContract="all";
-var currNode = {};
+var currSchool = {};
 
 var cachedData = {};
+
+var isRelationshipView = false;
 
 /* d3 initialization */
 // reset DOM
@@ -54,8 +57,9 @@ var pie = d3.pie()
 $('select').material_select(); //Materialize.css setup
 $(".button-collapse").sideNav({menuWidth:210});
 
-renderChart("2016", "");
+renderChart("2016", "", isRelationshipView);
 
+/******* Test *******/
 // testRelationshipView("2016", "Algonquin");
 
 function testRelationshipView(year, school) {
@@ -66,6 +70,7 @@ function testRelationshipView(year, school) {
         renderRelationshipView(school, cachedData);
     });
 }
+/******* Test *******/
 
 /*
 For filtering year
@@ -76,9 +81,9 @@ function updateData(year) {
         currYear=year;
 
         if (currContract != "all") {
-            renderChart(year,currContract);
+            renderChart(year,currContract,isRelationshipView);
         } else {
-            renderChart(year,"");
+            renderChart(year,"",isRelationshipView);
         }
     }
 }
@@ -88,11 +93,13 @@ For filtering contract type
 */
 function updateContract(contract) {
     currContract=contract;
-    renderChart("",contract);
+    renderChart("",contract, isRelationshipView);
 }
 
 function resumeMainView() {
     $('.backBtn').css("visibility", "hidden");
+
+    isRelationshipView = false;
 
     if (cachedData) {
         renderReset();
@@ -107,23 +114,37 @@ function renderReset() {
     d3.select(".container").select(".vizuly").selectAll("*").remove();
 }
 
-function renderChart(year, contract) {
-    /* This section manages the data filtering */
+/* Render visualization based on the filter values */
+function renderChart(year, contract, isRelationshipView) {
     if (year) { // filter by year
         if (contract) {
             // render multiple pie
             d3.json(dataMap.get(year), function(error, data) {
                 if (error) throw error;
+
                 cachedData = data;
+
                 renderReset();
-                renderMultiplePieView(contract, cachedData);
+
+                if (isRelationshipView) {
+                    renderRelationshipView(currSchool, cachedData);
+                } else {
+                    renderMultiplePieView(contract, cachedData);
+                }
             });
         } else {
             d3.json(dataMap.get(year), function(error, data) {
                 if (error) throw error;
+
                 cachedData = data;
+
                 renderReset();
-                renderMultipleDonutView(cachedData);
+
+                if (isRelationshipView) {
+                    renderRelationshipView(currSchool, cachedData);
+                } else {
+                    renderMultipleDonutView(cachedData);
+                }
             });
         }
     } else { // filter by contract
@@ -131,9 +152,17 @@ function renderChart(year, contract) {
             renderReset();
 
             if (contract === "all") {
-                renderMultipleDonutView(cachedData);
+                if (isRelationshipView) {
+                    renderRelationshipView(currSchool, cachedData);
+                } else {
+                    renderMultipleDonutView(cachedData);
+                }
             } else {
-                renderMultiplePieView(contract, cachedData);
+                if (isRelationshipView) {
+                    renderRelationshipView(currSchool, cachedData);
+                } else {
+                    renderMultiplePieView(contract, cachedData);
+                }
             }
         }
     }
@@ -174,6 +203,8 @@ function getContractCount(d, modifier) {
 
 /* Render multiple donut chart (main view) */
 function renderMultipleDonutView(data) {
+    isRelationshipView = false;
+
     var nodes = data.nodes;
 
     donutRadius.domain([0, d3.max(nodes, function(d) {
@@ -318,6 +349,8 @@ function renderMultipleDonutView(data) {
 
 /* Render multiple pie chart */
 function renderMultiplePieView(modifier, data) {
+    isRelationshipView = false;
+
     var pieData = [];
 
     data.nodes.forEach((d) => {
@@ -382,7 +415,7 @@ function showRelationship(d) {
 
     removeInfo();
 
-    currNode = d; // preserve node info for applying filters
+    currSchool = d.id; // preserve node info for applying filters
 
     if (cachedData) {
         $('.backBtn').css("visibility", "visible")
@@ -393,9 +426,17 @@ function showRelationship(d) {
     }
 }
 
-/* TODO: does not render correctly when going back and forth between
-main view and relationship view*/
 function renderRelationshipView(school, graph) {
+    isRelationshipView = true;
+
+    if (currContract === "all") {
+        renderNodeLinkDonut(school, graph);
+    } else {
+        renderNodeLinkPie(school, graph);
+    }
+}
+
+function renderNodeLinkDonut(school, graph) {
     simulation = d3.forceSimulation()
         .force("charge", d3.forceManyBody().strength(-3000))
         .force("collide", d3.forceCollide(function(d) {
@@ -409,12 +450,13 @@ function renderRelationshipView(school, graph) {
 
     if (!school) return;
 
-    // get nodes and links from raw data
-    var links = graph.links.filter(function(l) {
-        return l.source === school;
-    });
-
+    // deep copy graph data
     var nodes = [];
+    var links = [];
+
+    graph.links.forEach(function(l) {
+        if (l.source === school) links.push(clone(l));
+    });
 
     links.forEach(function(l) {
         var target = graph.nodes.find(function(n) {
@@ -422,15 +464,13 @@ function renderRelationshipView(school, graph) {
         });
 
         if (target) {
-            nodes.push(target);
+            nodes.push(clone(target));
         }
     });
 
-    var source = graph.nodes.find(function(n) {
-        return n.id === school;
+    graph.nodes.forEach(function(n) {
+        if (n.id === school) nodes.push(clone(n));
     });
-
-    nodes.push(source);
 
     var legend = d3.select(".vizuly").append("svg")
         .attr("class", "legend")
@@ -546,4 +586,49 @@ function renderRelationshipView(school, graph) {
                 return "translate(" + d.x + "," + d.y + ")"
             });
     }
+
+    // free memory
+    nodes = null;
+    links = null;
 }
+
+function renderNodeLinkPie(school, graph) {
+    console.log("Render node-link pie view");
+}
+
+/* deep copy method,
+http://stackoverflow.com/questions/728360/how-do-i-correctly-clone-a-javascript-object
+*/
+function clone(obj) {
+    var copy;
+
+    // Handle the 3 simple types, and null or undefined
+    if (null == obj || "object" != typeof obj) return obj;
+
+    // Handle Date
+    if (obj instanceof Date) {
+        copy = new Date();
+        copy.setTime(obj.getTime());
+        return copy;
+    }
+
+    // Handle Array
+    if (obj instanceof Array) {
+        copy = [];
+        for (var i = 0, len = obj.length; i < len; i++) {
+            copy[i] = clone(obj[i]);
+        }
+        return copy;
+    }
+
+    // Handle Object
+    if (obj instanceof Object) {
+        copy = {};
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+        }
+        return copy;
+    }
+
+    throw new Error("Unable to copy obj! Its type isn't supported.");
+};
