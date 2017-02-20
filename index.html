@@ -12,12 +12,9 @@
     <script type="text/javascript" src="lib/jquery-2.1.1.min.js"></script>
     <script src="lib/materialize/js/materialize.min.js"></script>
     <script src="lib/d3.min.js"></script>
-
-    <!-- Main logic -->
-    <script src="main.js"></script>
 </head>
 
-<body>
+<body onload="">
 <!-- This is our Materialize.css settings panel on the left side of the test container -->
 <ul id="slide-out" class="side-nav fixed" >
     <li class="logo">
@@ -59,10 +56,12 @@
 <!-- Our main content container-->
 <main>
     <div class="container">
+        <a class="waves-effect waves-light btn backBtn" onclick="resumeMainView()">Back</a>
         <div id="graph"></div>
         <div class="chart"></div>
         <div class="vizuly"></div>
     </div>
 </main>
+<script src="main.js"></script>
 </body>
 </html>

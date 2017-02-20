@@ -43,6 +43,13 @@ main {
     padding: 20px;
 }
 
+.backBtn {
+    position: absolute;
+    bottom: 20px;
+    left: 250px;
+    visibility: hidden;
+}
+
 .legend {
   vertical-align: top;
   margin-right: 40px;
