@@ -19,16 +19,7 @@ var svg = d3.select("#graph").append("svg").attr("width", window.innerWidth).att
     width = +svg.attr("width"),
     height = +svg.attr("height");
 
-var simulation = d3.forceSimulation()
-    .force("charge", d3.forceManyBody().strength(-3000))
-    .force("collide", d3.forceCollide(function(d) {
-        return 8;
-    }).iterations(10))
-    .force("link", d3.forceLink().id(function(d) {
-        return d.id;
-    }).distance(200))
-    .force("center", d3.forceCenter(width / 3, height / 3))
-    .alpha(0.6);
+var simulation = null;
 
 var radius = d3.scaleSqrt()
     .range([0, 1.5]);
