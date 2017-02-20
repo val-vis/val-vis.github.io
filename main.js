@@ -389,6 +389,8 @@ function renderMultiplePieView(modifier, data) {
 function showRelationship(d) {
     //   console.log(d.id);
 
+    removeInfo();
+
     currNode = d; // preserve node info for applying filters
 
     if (cachedData) {
@@ -403,10 +405,16 @@ function showRelationship(d) {
 /* TODO: does not render correctly when going back and forth between
 main view and relationship view*/
 function renderRelationshipView(school, graph) {
-    // See https://github.com/d3/d3-force/blob/master/README.md#simulation_tick
-    // for (var i = 0, n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay())); i < n; ++i) {
-    //     simulation.tick();
-    // }
+    simulation = d3.forceSimulation()
+        .force("charge", d3.forceManyBody().strength(-3000))
+        .force("collide", d3.forceCollide(function(d) {
+            return 8;
+        }).iterations(10))
+        .force("link", d3.forceLink().id(function(d) {
+            return d.id;
+        }).distance(200))
+        .force("center", d3.forceCenter(width / 3, height / 3))
+        .alpha(0.6);
 
     if (!school) return;
 
