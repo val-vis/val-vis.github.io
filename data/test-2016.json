@@ -1,0 +1,71 @@
+{
+  "nodes": [
+    {"id": "school1", "size": "191","paths": [
+        { "type":"bilateral", "count":30},
+        { "type":"multilateral","count":121},
+        { "type":"system","count":40}
+      ]},
+    {"id": "school2", "size": "60","paths": [
+        { "type":"bilateral", "count":20},
+        { "type":"multilateral","count": 40},
+        { "type":"system","count":0}
+      ]},
+    {"id": "school3", "size": "70","paths": [
+        { "type":"bilateral", "count":30},
+        { "type":"multilateral","count": 40},
+        { "type":"system","count":0}
+      ]},
+    {"id": "school4", "size": "20","paths": [
+        { "type":"bilateral", "count":1},
+        { "type":"multilateral","count": 19},
+        { "type":"system","count":0}
+      ]},
+    {"id": "school5", "size": "200","paths": [
+        { "type":"bilateral", "count":45},
+        { "type":"multilateral","count": 135},
+        { "type":"system","count":20}
+      ]},
+    {"id": "school6", "size": "700","paths": [
+        { "type":"bilateral", "count":100},
+        { "type":"multilateral","count": 400},
+        { "type":"system","count":200}
+      ]},
+    {"id": "school7", "size": "600","paths": [
+        { "type":"bilateral", "count":50},
+        { "type":"multilateral","count": 350},
+        { "type":"system","count":200}
+      ]},
+    {"id": "school8", "size": "60","paths": [
+        { "type":"bilateral", "count":10},
+        { "type":"multilateral","count": 35},
+        { "type":"system","count":15}
+      ]},
+    {"id": "school9", "size": "50","paths": [
+        { "type":"bilateral", "count":10},
+        { "type":"multilateral","count": 40},
+        { "type":"system","count":0}
+      ]},
+    {"id": "school10", "size": "100","paths": [
+        { "type":"bilateral", "count":5},
+        { "type":"multilateral","count": 85},
+        { "type":"system","count":10}
+      ]},
+    {"id": "school11", "size": "30","paths": [
+        { "type":"bilateral", "count":1},
+        { "type":"multilateral","count": 29},
+        { "type":"system","count":0}
+      ]}
+  ],
+  "links": [
+    {"source": "school1", "target": "school2", "value":20},
+    {"source": "school1", "target": "school3", "value":30},
+    {"source": "school1", "target": "school4", "value":10},
+    {"source": "school1", "target": "school5", "value":25},
+    {"source": "school1", "target": "school6", "value":30},
+    {"source": "school1", "target": "school7", "value":10},
+    {"source": "school1", "target": "school8", "value":20},
+    {"source": "school1", "target": "school9", "value":30},
+    {"source": "school1", "target": "school10", "value":1},
+    {"source": "school1", "target": "school11", "value":15}
+  ]
+}
