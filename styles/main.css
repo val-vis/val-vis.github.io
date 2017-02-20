@@ -1,0 +1,269 @@
+@media only screen {
+    main {
+        padding-left:210px;
+    }
+}
+
+
+@media only screen and (max-width: 768px) {
+    main {
+        padding-left: 0px;
+    }
+}
+
+path {
+/*stroke: #0d0d0d;*/
+cursor: pointer;
+transition: fill 250ms;
+}
+
+path:hover {
+  /* stroke-width: 10px; */
+  /*fill: #fff;*/
+  fill-opacity: 0.5;
+}
+
+main {
+    margin-top: -85px;
+}
+
+.chart {
+    position: absolute;
+    top:0;
+    padding: 20px;
+    /*top:20%;
+    left: 30%;
+    margin: 0 auto;*/
+}
+
+#graph {
+    /*top:20%;
+    left: 30%;
+    margin: 0 auto;*/
+    padding: 20px;
+}
+
+.legend {
+  vertical-align: top;
+  margin-right: 40px;
+}
+
+.tile {
+    font-family:Raleway;
+    font-weight:300;
+}
+
+.heading {
+    font-family:Raleway;
+    font-weight:300;
+}
+
+.side-nav li:hover {
+    /*background-color:#FFF;*/
+}
+
+.side-nav .logo {
+    margin-top: 20px;
+}
+
+.leftAxis {
+    font-weight:200;
+}
+
+.datatip-value {
+    position:absolute;
+    right:10px;
+}
+
+.title {
+    font-family: "Roboto";
+    font-size: 20px;
+    font-weight:200;
+}
+
+.container {
+    width:100%;
+}
+
+.vizuly {
+    font-family: "Raleway";
+    font-size:1.3em;
+    text-align:right;
+    position: absolute;
+    bottom: 20px;
+    right: 0;
+}
+
+svg {
+    border-radius: 4px;
+    shape-rendering: crispEdges;
+}
+
+.vz-data-point {
+    fill-opacity:1;
+    stroke-width: 1px;
+    stroke-opacity:1;
+}
+
+.vz-tip-hover {
+    font-weight:300;
+}
+
+.vz-tip-hover text{
+    opacity:.8;
+}
+
+.my-tip {
+    font-family:Raleway;
+    font-weight:300;
+    text-anchor:middle;
+}
+
+/* MATERIAL.CSS */
+
+[type="radio"]:checked + label:after {
+    background-color:#448AFF;
+    border-color: #3864c9;
+}
+
+[type="radio"] + label {
+    border-color: #3864c9;
+}
+
+.input-field {
+    margin-left: 0px;
+    padding-bottom: 5px;
+    font-family: "Roboto";
+    position: absolute;
+    bottom: 140px;
+}
+
+.input-field.data-filter {
+    position: absolute;
+    bottom: 100px;
+}
+
+.input-field.contract-filter {
+    position: absolute;
+    bottom: 180px;
+}
+
+.dropdown-content {
+    font-family:"Roboto";
+    font-size:.5em;
+}
+
+.dropdown-content li span {
+    font-family:"Roboto";
+    font-size:1.75em;
+}
+
+div.input-field label {
+    margin-left:-10px;
+}
+
+.mdi-navigation-menu {
+    font-size:30px;
+    color:#444;
+}
+
+div.settings-label {
+    border-top: 1px solid #000;
+    padding-top: 10px;
+    margin-top:10px;
+    margin-bottom:40px;
+    font-weight:300;
+}
+
+div.settings-label p{
+  font-size:23px;
+  color:#0E4580;
+}
+
+#institution-info p {
+    color: #030E19;
+}
+
+#institution-info p#school-title {
+    font-size: 20px;
+}
+
+#institution-info p#school-data {
+    font-size: 16px;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: left;
+    pointer-events: none;
+    width: 400px;
+    padding: 10px;
+    border: 1px solid #D5D5D5;
+    font-family: arial,helvetica,sans-serif;
+    font-size: 1.1em;
+    color: #333;
+    padding: 10px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.9);
+    color: #000;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+    -moz-box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+    border:1px solid rgba(200,200,200,0.85);
+}
+
+
+.header-rule{
+    height:1px;
+    margin:1px auto 3px;
+    margin-top:7px;
+    margin-bottom:7px;
+    background:#ddd;
+    width:125px;
+}
+
+.header1{
+    color:#000;
+    text-transform:uppercase;
+    font-size: 12px;
+    margin-bottom: 2px;
+    text-align:center;
+}
+
+.header2 {
+    text-transform: uppercase;
+    text-align: left;
+    font-size: 14px;
+    margin-bottom: 2px;
+    color:#666;
+    text-align:center;
+}
+
+.header3 {
+    color:#333;
+    text-align: left;
+    font-size: 15px;
+    font-style: italic;
+    font-family: Georgia;
+    /*  width:170px;*/
+    text-align:center;
+}
+
+
+i.mdi-navigation-menu:before {
+    font-size:40px;
+    content: "\e662";
+}
+i.mdi-navigation-menu:hover {
+    transition: color 0.5s ease;
+    color: #0176B4;
+}
+
+.node {
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.link {
+  stroke: #999;
+  stroke-width: 1.5px;
+}

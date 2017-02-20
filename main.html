@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ONCAT</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto|Raleway:600,400,200' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="lib/materialize/css/materialize.min.css">
+    <link rel="stylesheet" href="styles/main.css">
+
+    <!-- Plugins -->
+    <script type="text/javascript" src="lib/jquery-2.1.1.min.js"></script>
+    <script src="lib/materialize/js/materialize.min.js"></script>
+    <script src="lib/d3.min.js"></script>
+
+    <!-- Main logic -->
+    <script src="main.js"></script>
+</head>
+
+<body>
+<!-- This is our Materialize.css settings panel on the left side of the test container -->
+<ul id="slide-out" class="side-nav fixed" >
+    <li class="logo">
+        <a href="http://www.oncat.ca">
+            <img src="styles/pic/oncat-top-logo.png" height="47" class="default" alt="vizuly.io">
+        </a>
+    </li>
+    <li>
+        <!-- The user selected property drop downs -->
+        <div style="margin-left:0px; height:0px; width:180px; margin-right:20px;">
+            <div class="settings-label">
+              <p>Institutions & Agreement Pathways</p>
+              <div id="institution-info"></div>
+            </div>
+
+            <div class="input-field col s12 data-filter">
+                <select onchange="updateData(this.value);">
+                    <option value="2016">2016</option>
+                    <option value="2012">2012</option>
+                </select>
+                <label>Year</label>
+            </div>
+
+            <div class="input-field col s12 contract-filter">
+                <select onchange="updateContract(this.value);">
+                    <option value="all">All</option>
+                    <option value="bilateral">Bilateral</option>
+                    <option value="multilateral">Multilateral</option>
+                    <option value="system">System</option>
+                </select>
+                <label>Type</label>
+            </div>
+        </div>
+    </li>
+</ul>
+
+<a href="#" data-activates="slide-out" class="button-collapse show-on-large"><i class="mdi-navigation-menu"></i></a>
+
+<!-- Our main content container-->
+<main>
+    <div class="container">
+        <div id="graph"></div>
+        <div class="chart"></div>
+        <div class="vizuly"></div>
+    </div>
+</main>
+</body>
+</html>
