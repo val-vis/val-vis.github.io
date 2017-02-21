@@ -103,7 +103,8 @@ function resumeMainView() {
 
     if (cachedData) {
         renderReset();
-        renderMultipleDonutView(cachedData);
+        renderChart("", currContract, isRelationshipView)
+        // renderMultipleDonutView(cachedData);
     }
 }
 
@@ -168,24 +169,24 @@ function renderChart(year, contract, isRelationshipView) {
     }
 }
 
-function showInfo(d) {
-    if (d && d.id) { // tooltip for donut
-        var label = d3.select("#institution-info")
-            .append("h4")
-            .attr("id", "school-title")
-            .text(d.id)
-            .append("p")
-            .attr("id", "school-data")
-            .text("Total sending agreements: " + d.size);
-    } else if (d && d.school) {
-        var label = d3.select("#institution-info")
-            .append("h4")
-            .attr("id", "school-title")
-            .text(d.school)
-            .append("p")
-            .attr("id", "school-data")
-            .text("Sending agreements: " + d.count);
-    }
+function donutInfo(d) {
+    var label = d3.select("#institution-info")
+        .append("h4")
+        .attr("id", "school-title")
+        .text(d.id)
+        .append("p")
+        .attr("id", "school-data")
+        .text("Total sending agreements: " + d.size);
+}
+
+function pieInfo(d) {
+    var label = d3.select("#institution-info")
+        .append("h4")
+        .attr("id", "school-title")
+        .text(d.id)
+        .append("p")
+        .attr("id", "school-data")
+        .text("Sending agreements: " + d.count);
 }
 
 function removeInfo() {
@@ -222,7 +223,7 @@ function renderMultipleDonutView(data) {
         .enter().append("svg")
         .attr("class", "pie")
         .each(multiple)
-        .on("mouseover", showInfo)
+        .on("mouseover", donutInfo)
         .on("mouseout", removeInfo)
         .on("click", showRelationship)
         .select("g");
@@ -351,11 +352,16 @@ function renderMultipleDonutView(data) {
 function renderMultiplePieView(modifier, data) {
     isRelationshipView = false;
 
+    if ((currContract === "system") && (currYear === "2012")) {
+        // TODO: add some error message
+        return;
+    }
+
     var pieData = [];
 
     data.nodes.forEach((d) => {
         pieData.push({
-            school: d.id,
+            id: d.id,
             count: getContractCount(d, modifier)
         });
     });
@@ -369,8 +375,9 @@ function renderMultiplePieView(modifier, data) {
         .enter().append("svg")
         .attr("class", "pie")
         .each(multiple)
-        // .on("mouseover", showInfo)
-        // .on("mouseout", removeInfo)
+        .on("mouseover", pieInfo)
+        .on("mouseout", removeInfo)
+        .on("click", showRelationship)
         .select("g");
 
     //   var label = d3.selectAll(".pie").append("text")
@@ -517,7 +524,7 @@ function renderNodeLinkDonut(school, graph) {
         .data(nodes)
         .enter().append("g")
         .each(multiple)
-        .on("mouseover", showInfo)
+        .on("mouseover", donutInfo)
         .on("mouseout", removeInfo)
         ;
 
@@ -593,7 +600,128 @@ function renderNodeLinkDonut(school, graph) {
 }
 
 function renderNodeLinkPie(school, graph) {
-    console.log("Render node-link pie view");
+    if ((currContract === "system") && (currYear === "2012")) {
+        // TODO: add some error message
+        return;
+    }
+
+    simulation = d3.forceSimulation()
+        .force("charge", d3.forceManyBody().strength(-3000))
+        .force("collide", d3.forceCollide(function(d) {
+            return 8;
+        }).iterations(10))
+        .force("link", d3.forceLink().id(function(d) {
+            return d.id;
+        }).distance(200))
+        .force("center", d3.forceCenter(width / 3, height / 3))
+        .alpha(0.6);
+
+    if (!school) return;
+
+    // deep copy graph data
+    var nodes = [];
+    var links = [];
+
+    graph.links.forEach(function(l) {
+        if (l.source === school) links.push(clone(l));
+    });
+
+    links.forEach(function(l) {
+        var target = graph.nodes.find(function(n) {
+            return l.target === n.id;
+        });
+
+        if (target) {
+            nodes.push({
+                id: target.id,
+                count: getContractCount(target, currContract)
+            });
+        }
+    });
+
+    graph.nodes.forEach(function(n) {
+        if (n.id === school) {
+            nodes.push({
+                id: n.id,
+                count: getContractCount(n, currContract)
+            });
+        }
+    });
+
+    var link = svg.append("g")
+        .attr("class", "links")
+        .selectAll("line")
+        .data(links)
+        .enter().append("line")
+        .style("stroke", "#660066")
+        .style("stroke-width", "8px")
+        .style("opacity", function(d) {
+            return d.total * 0.05
+        });
+
+    var node = svg
+        .append("g")
+        .attr("class", "nodes")
+        .selectAll(".nodes")
+        .data(nodes)
+        .enter().append("g")
+        .each(multiple)
+        .on("mouseover", pieInfo)
+        .on("mouseout", removeInfo)
+        ;
+
+    function multiple(d) {
+        circleScale.domain([0, d3.max(nodes, function(d) {
+            return d.count;
+        })]);
+
+        var r = radius(d.count);
+
+        var subsvg = d3.select(this)
+            .attr("width", r * 2)
+            .attr("height", r * 2)
+            .append("circle")
+            .attr("class", "pie")
+            .attr("r", r)
+            .style("fill", pieColor[currContract])
+            ;
+    }
+
+    simulation
+        .nodes(nodes)
+        .on("tick", ticked);
+    simulation
+        .force("link")
+        .links(links);
+
+    function ticked() {
+        link.attr("x1", function(d) {
+                return d.source.x;
+            })
+            .attr("y1", function(d) {
+                return d.source.y;
+            })
+            .attr("x2", function(d) {
+                return d.target.x;
+            })
+            .attr("y2", function(d) {
+                return d.target.y;
+            });
+
+        node.attr("cx", function(d) {
+                return d.x;
+            })
+            .attr("cy", function(d) {
+                return d.y;
+            })
+            .attr("transform", function(d) {
+                return "translate(" + d.x + "," + d.y + ")"
+            });
+    }
+
+    // free memory
+    nodes = null;
+    links = null;
 }
 
 /* deep copy method,
