@@ -4,8 +4,8 @@ var viz_container;
 
 /* data loading */
 var dataMap = d3.map();
-dataMap.set("2012", "data/test-2012.json");
-dataMap.set("2016", "data/test-2016.json");
+dataMap.set("2012", "testdata/2012.json");
+dataMap.set("2016", "testdata/2016.json");
 
 var currYear="2016";
 var currContract="all";
