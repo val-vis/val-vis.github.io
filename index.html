@@ -56,10 +56,20 @@
 <!-- Our main content container-->
 <main>
     <div class="container">
+      <div id="viz_container" class="z-depth-1">
         <a class="waves-effect waves-light btn backBtn" onclick="resumeMainView()">Back</a>
         <div id="graph"></div>
         <div class="chart"></div>
-        <div class="vizuly"></div>
+        <div class="vizuly">
+          <defs>
+            <linearGradient id="Gradient2" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="red"/>
+              <stop offset="100%" stop-color="yellow"/>
+            </linearGradient>
+          </defs>
+        <rect x="10" y="120"  width="15" height="100" fill="url(#Gradient2)"/>
+        </div>
+      </div>
     </div>
 </main>
 <script src="main.js"></script>

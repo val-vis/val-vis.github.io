@@ -48,7 +48,6 @@ var pie = d3.pie()
     .padAngle(0.02)
     .startAngle(1.1 * Math.PI)
     .endAngle(3.1 * Math.PI)
-    // .attr("opacity", "1")
     .value(function(d) {
         return d.count;
     });
@@ -56,6 +55,9 @@ var pie = d3.pie()
 /* materialcss init */
 $('select').material_select(); //Materialize.css setup
 $(".button-collapse").sideNav({menuWidth:210});
+viz_container = d3.selectAll("#viz_container")
+    .style("width", "screenWidth" + "px")
+    .style("height","screenHeight" + "px");
 
 renderChart("2016", "", isRelationshipView);
 
@@ -228,25 +230,6 @@ function renderMultipleDonutView(data) {
         .on("click", showRelationship)
         .select("g");
 
-    //   var label = svg.append("text")
-    //       .attr("class", "label");
-    //
-    //   label.append("tspan")
-    //       .attr("class", "label-name")
-    //       .attr("x", 0)
-    //       .attr("dy", "-.2em")
-    //       .text(function(d) {
-    //           return d.id;
-    //       });
-    //
-    //   label.append("tspan")
-    //       .attr("class", "label-value")
-    //       .attr("x", 0)
-    //       .attr("dy", "1.1em")
-    //       .text(function(d) {
-    //           return d.size;
-    //       });
-
     var legend = d3.select(".vizuly").append("svg")
         .attr("class", "legend")
         .attr("width", 120)
@@ -264,7 +247,7 @@ function renderMultipleDonutView(data) {
         .style("fill", function(d) {
             return color(d.type);
         })
-        .style("opacity", "0.5");
+        .style("opacity", "1");
 
     legend.append("text")
         .attr("x", 34)
@@ -542,6 +525,8 @@ function renderNodeLinkDonut(school, graph) {
             // .attr("r", function(d){return radius(d.size)})
             .attr("width", outerRadius * 2)
             .attr("height", outerRadius * 2)
+            .attr("margin", "10px")
+
             .append("g");
 
         var g = subsvg.selectAll(".arc")
