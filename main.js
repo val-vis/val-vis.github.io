@@ -27,6 +27,8 @@ var simulation = null;
 var radius = d3.scaleSqrt()
     .range([0, 1.5]);
 
+var minRadius = 5;
+
 var donutRadius = d3.scaleSqrt() // radius for donuts
     .range([0, 70]);
 
@@ -479,6 +481,14 @@ function renderNodeLinkDonut(school, graph) {
         if (n.id === school) nodes.push(clone(n));
     });
 
+    // nodes = nodes.sort(function(a, b) {
+    //     return b.size - a.size;
+    // });
+
+    // links = links.sort(function(a, b) {
+    //     return b.total - a.total;
+    // });
+
     var legend = d3.select(".vizuly").append("svg")
         .attr("class", "legend")
         .attr("width", 120)
@@ -536,6 +546,10 @@ function renderNodeLinkDonut(school, graph) {
 
     function multiple(d) {
         var outerRadius = radius(d.size);
+        if (outerRadius <= minRadius) {
+            outerRadius = minRadius;
+        }
+
         var innerRadius = outerRadius * 0.7;
 
         var subsvg = d3.select(this)
@@ -623,7 +637,13 @@ function renderNodeLinkPie(school, graph) {
     var links = [];
 
     graph.links.forEach(function(l) {
-        if (l.source === school) links.push(clone(l));
+        if (l.source === school) {
+            if (currContract !== "all") {
+                if (l[currContract] !== 0) links.push(clone(l));
+            } else {
+                links.push(clone(l));
+            }
+        }
     });
 
     links.forEach(function(l) {
@@ -676,6 +696,10 @@ function renderNodeLinkPie(school, graph) {
         })]);
 
         var r = radius(d.count);
+
+        if (r <= minRadius) {
+            r = minRadius;
+        }
 
         var subsvg = d3.select(this)
             .attr("width", r * 2)
