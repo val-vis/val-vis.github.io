@@ -27,25 +27,10 @@ main {
     margin-top: -85px;
 }
 
-.chart {
-    position: absolute;
-    top:0;
-    padding: 20px;
-    /*top:20%;
-    left: 30%;
-    margin: 0 auto;*/
-}
-
-#graph {
-    /*top:20%;
-    left: 30%;
-    margin: 0 auto;*/
-    padding: 20px;
-}
 
 .backBtn {
     position: absolute;
-    bottom: 20px;
+    /*bottom: 20px;*/
     left: 250px;
     visibility: hidden;
 }
@@ -88,22 +73,47 @@ main {
     font-weight:200;
 }
 
-.container {
+div.container {
     width:100%;
+    top:100px;
+}
+
+#viz_container {
+    margin:0px auto;
+    width:100%;
+    height:auto;
+    padding-top:0px;
+    border-radius:6px;
+}
+
+.chart {
+    padding: 20px;
+    /*top:30%;
+    left: 10%;*/
+    /*margin: 0 auto;*/
+}
+
+#graph {
+    /*top:20%;
+    left: 30%;
+    margin: 0 auto;*/
+    padding: 20px;
 }
 
 .vizuly {
     font-family: "Raleway";
     font-size:1.3em;
     text-align:right;
-    position: absolute;
-    bottom: 20px;
+    margin-top: 30px;
+    /*position: absolute;*/
+    bottom: 10px;
     right: 0;
 }
 
 svg {
     border-radius: 4px;
     shape-rendering: crispEdges;
+    margin:10px;
 }
 
 .vz-data-point {

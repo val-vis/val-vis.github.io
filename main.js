@@ -4,8 +4,8 @@ var viz_container;
 
 /* data loading */
 var dataMap = d3.map();
-dataMap.set("2012", "testdata/2012.json");
-dataMap.set("2016", "testdata/2016.json");
+dataMap.set("2012", "testdata/_2012.json");
+dataMap.set("2016", "testdata/_2016.json");
 
 var currYear="2016";
 var currContract="all";
@@ -18,7 +18,7 @@ var isRelationshipView = false;
 /* d3 initialization */
 // reset DOM
 d3.select("#graph").selectAll("*").remove();
-var svg = d3.select("#graph").append("svg").attr("width", window.innerWidth).attr("height", window.innerHeight),
+var svg = d3.select("#graph").append("svg").attr("width", parent.innerWidth).attr("height", parent.innerHeight),
     width = +svg.attr("width"),
     height = +svg.attr("height");
 
@@ -232,7 +232,7 @@ function renderMultipleDonutView(data) {
 
     var legend = d3.select(".vizuly").append("svg")
         .attr("class", "legend")
-        .attr("width", 120)
+        .attr("width", 160)
         .attr("height", (3) * 20)
         .selectAll("g")
         .data(nodes[0].paths)
@@ -246,8 +246,7 @@ function renderMultipleDonutView(data) {
         .attr("height", 18)
         .style("fill", function(d) {
             return color(d.type);
-        })
-        .style("opacity", "1");
+        });
 
     legend.append("text")
         .attr("x", 34)
@@ -263,6 +262,7 @@ function renderMultipleDonutView(data) {
         var svg = d3.select(this)
             .attr("width", outerRadius * 2)
             .attr("height", outerRadius * 2)
+            .attr("margin", "10px")
             .append("g")
             .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
 
@@ -462,9 +462,38 @@ function renderNodeLinkDonut(school, graph) {
         if (n.id === school) nodes.push(clone(n));
     });
 
+    var defs = d3.select(".vizuly").append("svg")
+    var lg = defs.append('linearGradient')
+            .attr('id', 'Gradient2')
+            .attr('x1', 1)
+            .attr('x2', 0)
+            .attr('y1', 0)
+            .attr('y2', 0);
+
+            lg.append('stop')
+            .attr('offset', '0%')
+            .attr('stop-color', '#660066');
+
+            lg.append('stop')
+            .attr('offset', '100%')
+            .attr('stop-color', '#f7e6f7');
+
+            defs.append('rect')
+            .attr('x', 10)
+            .attr('y', 20)
+            .attr('width', 200)
+            .attr('height', 20)
+            .style("fill", "url(#Gradient2)");
+
+            defs.append("text")
+                .attr("x", 34)
+                .attr("y", 60)
+                .attr("dy", ".35em")
+                .text("connections");
+
     var legend = d3.select(".vizuly").append("svg")
         .attr("class", "legend")
-        .attr("width", 120)
+        .attr("width", 160)
         .attr("height", (3) * 20)
         .selectAll("g")
         .data(graph.nodes[0].paths)
@@ -474,15 +503,14 @@ function renderNodeLinkDonut(school, graph) {
         });
 
     legend.append("rect")
-        .attr("width", 18)
+        .attr("width", 28)
         .attr("height", 18)
         .style("fill", function(d) {
             return color(d.type);
-        })
-        .style("opacity", "0.5");
+        });
 
     legend.append("text")
-        .attr("x", 24)
+        .attr("x", 34)
         .attr("y", 9)
         .attr("dy", ".35em")
         .text(function(d) {
@@ -598,7 +626,7 @@ function renderNodeLinkPie(school, graph) {
         .force("link", d3.forceLink().id(function(d) {
             return d.id;
         }).distance(200))
-        .force("center", d3.forceCenter(width / 3, height / 3))
+        .force("center", d3.forceCenter(width / 2, height / 2))
         .alpha(0.6);
 
     if (!school) return;
