@@ -31,8 +31,12 @@ main {
 .backBtn {
     position:absolute;
     background-color: #8ed8f8;
+<<<<<<< HEAD
     left: 400px;
     top:10px;
+=======
+    left: 300px;
+>>>>>>> 5118b41b21edbcb55d79d3a35eb6a449c96472ea
     visibility: hidden;
 }
 
