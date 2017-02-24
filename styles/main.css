@@ -29,9 +29,15 @@ main {
 
 
 .backBtn {
+<<<<<<< HEAD
     position:absolute;
     background-color: #8ed8f8;
     left: 300px;
+=======
+    position: absolute;
+    /*bottom: 20px;*/
+    left: 250px;
+>>>>>>> e0c07d338b1152cd904b576a78415b9038686e47
     visibility: hidden;
 }
 
@@ -98,11 +104,14 @@ div.container {
     left: 30%;
     margin: 0 auto;*/
     padding: 20px;
+<<<<<<< HEAD
 }
 
 #graph.svg{
  display: inline-block;
  margin: auto;
+=======
+>>>>>>> e0c07d338b1152cd904b576a78415b9038686e47
 }
 
 .vizuly {
@@ -110,6 +119,10 @@ div.container {
     font-size:1.3em;
     text-align:right;
     margin-top: 30px;
+<<<<<<< HEAD
+=======
+    /*position: absolute;*/
+>>>>>>> e0c07d338b1152cd904b576a78415b9038686e47
     bottom: 10px;
     right: 0;
 }
