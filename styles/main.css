@@ -21,6 +21,10 @@ path:hover {
     fill-opacity: 0.5;
 }
 
+body {
+    overflow-x: hidden;
+}
+
 main {
     margin-top: -70px;
 }
@@ -55,17 +59,16 @@ div.container {
 }
 
 #viz_container {
-    margin:0px auto;
-    padding-top:0px;
-    border-radius:6px;
+    /*width:100%;
+    top:100px;*/
 }
 
 .vizuly {
     font-family: "Raleway";
     font-size:1.3em;
     text-align:right;
-    margin-top: 30px;
-    bottom: 10px;
+    position: fixed;
+    bottom: 0;
     right: 0;
 }
 
@@ -74,19 +77,19 @@ div.container {
 }
 
 #graph.svg{
-    display: inline-block;
-    margin: auto;
+    /*display: inline-block;*/
+    /*margin: auto;*/
 }
 
 .legend {
-  vertical-align: top;
-  margin-right: 40px;
+    vertical-align: top;
 }
 
-.backBtn {
+#backBtn {
     position:absolute;
     background-color: #8ed8f8;
-    left: 300px;
+    top: 15px;
+    left: 230px;
     visibility: hidden;
 }
 
