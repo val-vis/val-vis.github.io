@@ -56,10 +56,13 @@
 <!-- Our main content container-->
 <main>
     <div class="container">
-        <a class="waves-effect waves-light btn backBtn" onclick="resumeMainView()">Back</a>
-        <div id="graph"></div>
+      <div id="viz_container" class="z-depth-0">
         <div class="chart"></div>
-        <div class="vizuly"></div>
+        <div id="graph"></div>
+        <div><a class="waves-effect waves-light btn backBtn" onclick="resumeMainView()">Back</a></div>
+        <div class="vizuly">
+        </div>
+      </div>
     </div>
 </main>
 <script src="main.js"></script>

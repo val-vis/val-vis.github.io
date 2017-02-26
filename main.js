@@ -18,9 +18,10 @@ var isRelationshipView = false;
 /* d3 initialization */
 // reset DOM
 d3.select("#graph").selectAll("*").remove();
-var svg = d3.select("#graph").append("svg").attr("width", window.innerWidth).attr("height", window.innerHeight),
+var svg = d3.select("#graph").append("svg").attr("width", parent.innerWidth).attr("height", parent.innerHeight),
     width = +svg.attr("width"),
     height = +svg.attr("height");
+    svg.attr("display", "block").attr("margin","10px");
 
 var simulation = null;
 
@@ -50,7 +51,6 @@ var pie = d3.pie()
     .padAngle(0.02)
     .startAngle(1.1 * Math.PI)
     .endAngle(3.1 * Math.PI)
-    // .attr("opacity", "1")
     .value(function(d) {
         return d.count;
     });
@@ -58,6 +58,9 @@ var pie = d3.pie()
 /* materialcss init */
 $('select').material_select(); //Materialize.css setup
 $(".button-collapse").sideNav({menuWidth:210});
+viz_container = d3.selectAll("#viz_container")
+    .style("width", "screenWidth" + "px")
+    .style("height","screenHeight" + "px");
 
 renderChart("2016", "", isRelationshipView);
 
@@ -230,28 +233,9 @@ function renderMultipleDonutView(data) {
         .on("click", showRelationship)
         .select("g");
 
-    //   var label = svg.append("text")
-    //       .attr("class", "label");
-    //
-    //   label.append("tspan")
-    //       .attr("class", "label-name")
-    //       .attr("x", 0)
-    //       .attr("dy", "-.2em")
-    //       .text(function(d) {
-    //           return d.id;
-    //       });
-    //
-    //   label.append("tspan")
-    //       .attr("class", "label-value")
-    //       .attr("x", 0)
-    //       .attr("dy", "1.1em")
-    //       .text(function(d) {
-    //           return d.size;
-    //       });
-
-    var legend = d3.select(".vizuly").append("svg")
+    var legend = d3.select(".chart").append("svg")
         .attr("class", "legend")
-        .attr("width", 120)
+        .attr("width", 160)
         .attr("height", (3) * 20)
         .selectAll("g")
         .data(nodes[0].paths)
@@ -265,8 +249,7 @@ function renderMultipleDonutView(data) {
         .attr("height", 18)
         .style("fill", function(d) {
             return color(d.type);
-        })
-        .style("opacity", "0.5");
+        });
 
     legend.append("text")
         .attr("x", 34)
@@ -282,6 +265,7 @@ function renderMultipleDonutView(data) {
         var svg = d3.select(this)
             .attr("width", outerRadius * 2)
             .attr("height", outerRadius * 2)
+            .attr("margin", "10px")
             .append("g")
             .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
 
@@ -382,25 +366,6 @@ function renderMultiplePieView(modifier, data) {
         .on("click", showRelationship)
         .select("g");
 
-    //   var label = d3.selectAll(".pie").append("text")
-    //       .attr("class", "label");
-    //
-    //   label.append("tspan")
-    //       .attr("class", "label-name")
-    //       .attr("x", 0)
-    //       .attr("dy", "-.2em")
-    //       .text(function(d) {
-    //           return d.school;
-    //       });
-    //
-    //   label.append("tspan")
-    //       .attr("class", "label-value")
-    //       .attr("x", 0)
-    //       .attr("dy", "1.1em")
-    //       .text(function(d) {
-    //           return d.count;
-    //       });
-
     function multiple(d) {
         circleScale.domain([0, d3.max(pieData, function(d) {
             return d.count;
@@ -427,7 +392,7 @@ function showRelationship(d) {
     currSchool = d.id; // preserve node info for applying filters
 
     if (cachedData) {
-        $('.backBtn').css("visibility", "visible")
+        $('.backBtn').css("visibility", "visible").css("background-color", "#8ed8f8")
 
         renderReset();
 
@@ -453,8 +418,8 @@ function renderNodeLinkDonut(school, graph) {
         }).iterations(10))
         .force("link", d3.forceLink().id(function(d) {
             return d.id;
-        }).distance(200))
-        .force("center", d3.forceCenter(width / 3, height / 3))
+        }).distance(185))
+        .force("center", d3.forceCenter(width / 2, height / 2))
         .alpha(0.6);
 
     if (!school) return;
@@ -481,17 +446,38 @@ function renderNodeLinkDonut(school, graph) {
         if (n.id === school) nodes.push(clone(n));
     });
 
-    // nodes = nodes.sort(function(a, b) {
-    //     return b.size - a.size;
-    // });
+    var defs = d3.select(".vizuly").append("svg")
+    var lg = defs.append('linearGradient')
+            .attr('id', 'Gradient2')
+            .attr('x1', 1)
+            .attr('x2', 0)
+            .attr('y1', 0)
+            .attr('y2', 0);
 
-    // links = links.sort(function(a, b) {
-    //     return b.total - a.total;
-    // });
+            lg.append('stop')
+            .attr('offset', '0%')
+            .attr('stop-color', '#660066');
+
+            lg.append('stop')
+            .attr('offset', '100%')
+            .attr('stop-color', '#f7e6f7');
+
+            defs.append('rect')
+            .attr('x', 10)
+            .attr('y', 20)
+            .attr('width', 200)
+            .attr('height', 20)
+            .style("fill", "url(#Gradient2)");
+
+            defs.append("text")
+                .attr("x", 34)
+                .attr("y", 60)
+                .attr("dy", ".35em")
+                .text("connections");
 
     var legend = d3.select(".vizuly").append("svg")
         .attr("class", "legend")
-        .attr("width", 120)
+        .attr("width", 160)
         .attr("height", (3) * 20)
         .selectAll("g")
         .data(graph.nodes[0].paths)
@@ -501,15 +487,14 @@ function renderNodeLinkDonut(school, graph) {
         });
 
     legend.append("rect")
-        .attr("width", 18)
+        .attr("width", 28)
         .attr("height", 18)
         .style("fill", function(d) {
             return color(d.type);
-        })
-        .style("opacity", "0.5");
+        });
 
     legend.append("text")
-        .attr("x", 24)
+        .attr("x", 34)
         .attr("y", 9)
         .attr("dy", ".35em")
         .text(function(d) {
@@ -556,6 +541,8 @@ function renderNodeLinkDonut(school, graph) {
             // .attr("r", function(d){return radius(d.size)})
             .attr("width", outerRadius * 2)
             .attr("height", outerRadius * 2)
+            .attr("margin", "10px")
+
             .append("g");
 
         var g = subsvg.selectAll(".arc")
@@ -627,7 +614,7 @@ function renderNodeLinkPie(school, graph) {
         .force("link", d3.forceLink().id(function(d) {
             return d.id;
         }).distance(200))
-        .force("center", d3.forceCenter(width / 3, height / 3))
+        .force("center", d3.forceCenter(width / 2, height / 2))
         .alpha(0.6);
 
     if (!school) return;
