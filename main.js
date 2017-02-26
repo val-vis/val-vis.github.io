@@ -18,11 +18,10 @@ var isRelationshipView = false;
 /* d3 initialization */
 // reset DOM
 d3.select("#graph").selectAll("*").remove();
-var svg = d3.select("#graph").append("svg").attr("width", parent.innerWidth).attr("height", parent.innerHeight),
-    width = +svg.attr("width"),
-    height = +svg.attr("height");
-    svg.attr("display", "block").attr("margin","10px");
-
+// svg.attr("display", "block").attr("margin","10px");
+var width = 0;
+var height = 0;
+var svg = null;
 var simulation = null;
 
 var radius = d3.scaleSqrt()
@@ -38,11 +37,17 @@ var circleScale = d3.scaleSqrt().range([0, 20]); // for pie
 var color = d3.scaleOrdinal()
     .range(["#8ed8f8", "#00bfff", "#005baa"]);
 
-var pieColor = {
+const PIE_COLOR = {
     bilateral: '#8ed8f8',
     multilateral: '#00bfff',
     system: '#005baa'
 };
+
+const LEG_TEXT = {
+    bilateral: "Bi-lateral Agreements",
+    multilateral: "Multi-lateral Agreements",
+    system: "System Agreements"
+}
 
 var arc = d3.arc();
 
@@ -115,8 +120,8 @@ function resumeMainView() {
 
 /* Erase graph */
 function renderReset() {
-    d3.select("#graph").select("svg").selectAll("*").remove();
-    d3.select(".container").select(".chart").selectAll("*").remove();
+    d3.select("#graph").selectAll("*").remove();
+    // d3.select(".container").select("#chart").selectAll("*").remove();
     d3.select(".container").select(".vizuly").selectAll("*").remove();
 }
 
@@ -219,7 +224,7 @@ function renderMultipleDonutView(data) {
 
     color.domain(nodes);
 
-    var chart = d3.select(".container").select(".chart");
+    var chart = d3.select(".container").select("#graph");
 
     var svg = chart.selectAll(".pie")
         .data(nodes.sort(function(a, b) {
@@ -233,7 +238,7 @@ function renderMultipleDonutView(data) {
         .on("click", showRelationship)
         .select("g");
 
-    var legend = d3.select(".chart").append("svg")
+    var legend = d3.select("#graph").append("svg")
         .attr("class", "legend")
         .attr("width", 160)
         .attr("height", (3) * 20)
@@ -256,7 +261,7 @@ function renderMultipleDonutView(data) {
         .attr("y", 9)
         .attr("dy", ".35em")
         .text(function(d) {
-            return d.type;
+            return LEG_TEXT[d.type];
         });
 
     function multiple(d) {
@@ -352,7 +357,7 @@ function renderMultiplePieView(modifier, data) {
         });
     });
 
-    var chart = d3.select(".container").select(".chart");
+    var chart = d3.select(".container").select("#graph");
 
     var chart = chart.selectAll(".pie")
         .data(pieData.sort(function(a, b) {
@@ -380,7 +385,7 @@ function renderMultiplePieView(modifier, data) {
             .attr("transform", "translate(" + r + "," + r + ")")
             .attr("class", "circle")
             .attr("r", r)
-            .style("fill", pieColor[modifier]);
+            .style("fill", PIE_COLOR[modifier]);
     }
 }
 
@@ -402,6 +407,14 @@ function showRelationship(d) {
 
 function renderRelationshipView(school, graph) {
     isRelationshipView = true;
+
+    width = window.innerWidth - $('slide-out').outerWidth();
+    height = window.innerHeight;
+    svg = d3.select("#graph")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        ;
 
     if (currContract === "all") {
         renderNodeLinkDonut(school, graph);
@@ -446,39 +459,13 @@ function renderNodeLinkDonut(school, graph) {
         if (n.id === school) nodes.push(clone(n));
     });
 
-    var defs = d3.select(".vizuly").append("svg")
-    var lg = defs.append('linearGradient')
-            .attr('id', 'Gradient2')
-            .attr('x1', 1)
-            .attr('x2', 0)
-            .attr('y1', 0)
-            .attr('y2', 0);
-
-            lg.append('stop')
-            .attr('offset', '0%')
-            .attr('stop-color', '#660066');
-
-            lg.append('stop')
-            .attr('offset', '100%')
-            .attr('stop-color', '#f7e6f7');
-
-            defs.append('rect')
-            .attr('x', 10)
-            .attr('y', 20)
-            .attr('width', 200)
-            .attr('height', 20)
-            .style("fill", "url(#Gradient2)");
-
-            defs.append("text")
-                .attr("x", 34)
-                .attr("y", 60)
-                .attr("dy", ".35em")
-                .text("connections");
+    var widthSolid = 120;
+    var heightSolid = 18;
 
     var legend = d3.select(".vizuly").append("svg")
         .attr("class", "legend")
-        .attr("width", 160)
-        .attr("height", (3) * 20)
+        // .attr("width", 240)
+        .attr("height", 120)
         .selectAll("g")
         .data(graph.nodes[0].paths)
         .enter().append("g")
@@ -487,19 +474,73 @@ function renderNodeLinkDonut(school, graph) {
         });
 
     legend.append("rect")
-        .attr("width", 28)
-        .attr("height", 18)
+        .attr("width", widthSolid)
+        .attr("height", heightSolid)
         .style("fill", function(d) {
             return color(d.type);
         });
 
     legend.append("text")
-        .attr("x", 34)
+        .attr("x", widthSolid+8)
         .attr("y", 9)
         .attr("dy", ".35em")
         .text(function(d) {
-            return d.type;
+            return LEG_TEXT[d.type];
         });
+
+    var widthHeatMap = 120;
+    var heightHeatMap = 20;
+
+    var heatMap = d3.select(".vizuly").select(".legend")
+        .append("g")
+        .attr("id", "heatmap")
+        .attr("transform", "translate(0," + 80 + ")")
+        ;
+    // legend for links
+    var lg = heatMap.append('linearGradient')
+        .attr('id', 'Gradient2')
+        .attr('x1', 1)
+        .attr('x2', 0)
+        .attr('y1', 0)
+        .attr('y2', 0);
+
+    lg.append('stop')
+        .attr('offset', '0%')
+        .attr('stop-color', '#660066');
+
+    lg.append('stop')
+        .attr('offset', '100%')
+        .attr('stop-color', '#f7e6f7');
+
+    heatMap.append('rect')
+        .attr('x', 0)
+        .attr('y', 9)
+        .attr('width', widthHeatMap)
+        .attr('height', heightHeatMap)
+        .style("fill", "url(#Gradient2)");
+
+    // add text for legend title
+    heatMap.append("text")
+        .attr("x", widthHeatMap+8)
+        .attr("y", heightHeatMap)
+        .attr("dy", ".35em")
+        .text("Number of Agreements");
+
+    // add text for min value
+    heatMap.append("text")
+        .attr("x", 6)
+        .attr("y", 0)
+        .attr("dy", ".35em")
+        .style("text-anchor", "middle")
+        .text("0");
+
+    // add text for max value
+    heatMap.append("text")
+        .attr("x", widthHeatMap)
+        .attr("y", 0)
+        .attr("dy", ".35em")
+        .style("text-anchor", "middle")
+        .text("Total");
 
     var link = svg.append("g")
         .attr("class", "links")
@@ -694,7 +735,7 @@ function renderNodeLinkPie(school, graph) {
             .append("circle")
             .attr("class", "pie")
             .attr("r", r)
-            .style("fill", pieColor[currContract])
+            .style("fill", PIE_COLOR[currContract])
             ;
     }
 
