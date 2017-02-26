@@ -18,30 +18,57 @@ var isRelationshipView = false;
 /* d3 initialization */
 // reset DOM
 d3.select("#graph").selectAll("*").remove();
-var svg = d3.select("#graph").append("svg").attr("width", window.innerWidth).attr("height", window.innerHeight),
-    width = +svg.attr("width"),
-    height = +svg.attr("height");
-
+// svg.attr("display", "block").attr("margin","10px");
+var width = 0;
+var height = 0;
+var svg = null;
 var simulation = null;
 
 var radius = d3.scaleSqrt()
     .range([0, 1.5]);
 
+var nodeLinkRadius = d3.scaleSqrt()
+    .range([0, 1.2]);
+
 var minRadius = 5;
 
 var donutRadius = d3.scaleSqrt() // radius for donuts
-    .range([0, 70]);
+    .range([0, 60]);
 
 var circleScale = d3.scaleSqrt().range([0, 20]); // for pie
 
 var color = d3.scaleOrdinal()
     .range(["#8ed8f8", "#00bfff", "#005baa"]);
 
-var pieColor = {
+const PIE_COLOR = {
     bilateral: '#8ed8f8',
     multilateral: '#00bfff',
     system: '#005baa'
 };
+
+const LEG_TEXT = {
+    bilateral: "Bi-lateral Agreements",
+    multilateral: "Multi-lateral Agreements",
+    system: "System Agreements"
+}
+
+const ZOOM_ON = false;
+
+/* Simulation parameters */
+const CHARGE_STR = -3000;
+const LINK_DIST = 60;
+
+/* For calculating force starting position */
+const W_FACTOR = 3; // width factor
+const H_FACTOR = 2.5; // height factor
+const PIE_W_FACTOR = 2.8;
+const PIE_H_FACTOR = 2.8;
+
+/* Legend dimensions */
+const SOLID_W = 120;
+const SOLID_H = 18;
+const HEATMAP_W = 120;
+const HEATMAP_H = 20;
 
 var arc = d3.arc();
 
@@ -50,16 +77,60 @@ var pie = d3.pie()
     .padAngle(0.02)
     .startAngle(1.1 * Math.PI)
     .endAngle(3.1 * Math.PI)
-    // .attr("opacity", "1")
     .value(function(d) {
         return d.count;
     });
 
+/* Zoom */
+var min_zoom = 0.1;
+var max_zoom = 7;
+var zoomScale = d3.zoom().scaleExtent([min_zoom,max_zoom]);
+
 /* materialcss init */
 $('select').material_select(); //Materialize.css setup
 $(".button-collapse").sideNav({menuWidth:210});
+viz_container = d3.selectAll("#viz_container")
+    .style("width", "screenWidth" + "px")
+    .style("height","screenHeight" + "px");
+
+/* Fix back button */
+var topOffset = parseInt($("#backBtn").css('top'));
+$(window).scroll(function(){
+    $('#backBtn').css({
+        'top': $(this).scrollTop() + topOffset
+    });
+});
+
+$(window).resize(function() {
+    windowResize();
+});
+
+// $(window).mousedown(function() {
+//     console.log("Mouse click trigger!");
+// });
 
 renderChart("2016", "", isRelationshipView);
+
+setTimeout(windowResize, 50);
+
+function windowResize() {
+    var availHeight = window.innerHeight - $('.vizuly').outerHeight(true);
+    var availWidth = window.innerWidth - $('#slide-out').outerWidth();
+
+    var graphWidth = $('#graph').outerWidth();
+    var graphHeight = $('#graph').outerHeight();
+
+    var scaleFactor = 1;
+
+    scaleFactor = Math.min(
+        availWidth/graphWidth,
+        availHeight/graphHeight
+    );
+
+    if (scaleFactor !== 1) {
+        // $('#graph').css("transform", "translate(-50%, -50%) scale(" + scaleFactor + ")");
+    }
+}
 
 /******* Test *******/
 // testRelationshipView("2016", "Algonquin");
@@ -99,7 +170,7 @@ function updateContract(contract) {
 }
 
 function resumeMainView() {
-    $('.backBtn').css("visibility", "hidden");
+    $('#backBtn').css("visibility", "hidden");
 
     isRelationshipView = false;
 
@@ -112,9 +183,9 @@ function resumeMainView() {
 
 /* Erase graph */
 function renderReset() {
-    d3.select("#graph").select("svg").selectAll("*").remove();
-    d3.select(".container").select(".chart").selectAll("*").remove();
-    d3.select(".container").select(".vizuly").selectAll("*").remove();
+    d3.select("#graph").selectAll("*").remove();
+    // d3.select("#viz_container").select("#chart").selectAll("*").remove();
+    d3.select("#viz_container").select(".vizuly").selectAll("*").remove();
 }
 
 /* Render visualization based on the filter values */
@@ -216,7 +287,14 @@ function renderMultipleDonutView(data) {
 
     color.domain(nodes);
 
-    var chart = d3.select(".container").select(".chart");
+    var chart = d3.select("#viz_container").select("#graph")
+        // .attr("width", '100%')
+        // .attr("height", '100%')
+        // .attr('viewBox','0 0 '+Math.min(width,height) +' '+Math.min(width,height) )
+        // .attr('preserveAspectRatio','xMinYMin')
+        // .append("g")
+        // .attr("transform", "translate(" + Math.min(width,height) / 2 + "," + Math.min(width,height) / 2 + ")")
+        ;
 
     var svg = chart.selectAll(".pie")
         .data(nodes.sort(function(a, b) {
@@ -230,29 +308,10 @@ function renderMultipleDonutView(data) {
         .on("click", showRelationship)
         .select("g");
 
-    //   var label = svg.append("text")
-    //       .attr("class", "label");
-    //
-    //   label.append("tspan")
-    //       .attr("class", "label-name")
-    //       .attr("x", 0)
-    //       .attr("dy", "-.2em")
-    //       .text(function(d) {
-    //           return d.id;
-    //       });
-    //
-    //   label.append("tspan")
-    //       .attr("class", "label-value")
-    //       .attr("x", 0)
-    //       .attr("dy", "1.1em")
-    //       .text(function(d) {
-    //           return d.size;
-    //       });
-
     var legend = d3.select(".vizuly").append("svg")
         .attr("class", "legend")
-        .attr("width", 120)
-        .attr("height", (3) * 20)
+        .attr("width", 400)
+        .attr("height", 80)
         .selectAll("g")
         .data(nodes[0].paths)
         .enter().append("g")
@@ -261,19 +320,18 @@ function renderMultipleDonutView(data) {
         });
 
     legend.append("rect")
-        .attr("width", 28)
-        .attr("height", 18)
+        .attr("width", SOLID_W)
+        .attr("height", SOLID_H)
         .style("fill", function(d) {
             return color(d.type);
-        })
-        .style("opacity", "0.5");
+        });
 
     legend.append("text")
-        .attr("x", 34)
+        .attr("x", SOLID_W+8)
         .attr("y", 9)
         .attr("dy", ".35em")
         .text(function(d) {
-            return d.type;
+            return LEG_TEXT[d.type];
         });
 
     function multiple(d) {
@@ -282,6 +340,7 @@ function renderMultipleDonutView(data) {
         var svg = d3.select(this)
             .attr("width", outerRadius * 2)
             .attr("height", outerRadius * 2)
+            .attr("margin", "10px")
             .append("g")
             .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
 
@@ -368,7 +427,7 @@ function renderMultiplePieView(modifier, data) {
         });
     });
 
-    var chart = d3.select(".container").select(".chart");
+    var chart = d3.select("#viz_container").select("#graph");
 
     var chart = chart.selectAll(".pie")
         .data(pieData.sort(function(a, b) {
@@ -381,25 +440,6 @@ function renderMultiplePieView(modifier, data) {
         .on("mouseout", removeInfo)
         .on("click", showRelationship)
         .select("g");
-
-    //   var label = d3.selectAll(".pie").append("text")
-    //       .attr("class", "label");
-    //
-    //   label.append("tspan")
-    //       .attr("class", "label-name")
-    //       .attr("x", 0)
-    //       .attr("dy", "-.2em")
-    //       .text(function(d) {
-    //           return d.school;
-    //       });
-    //
-    //   label.append("tspan")
-    //       .attr("class", "label-value")
-    //       .attr("x", 0)
-    //       .attr("dy", "1.1em")
-    //       .text(function(d) {
-    //           return d.count;
-    //       });
 
     function multiple(d) {
         circleScale.domain([0, d3.max(pieData, function(d) {
@@ -415,7 +455,7 @@ function renderMultiplePieView(modifier, data) {
             .attr("transform", "translate(" + r + "," + r + ")")
             .attr("class", "circle")
             .attr("r", r)
-            .style("fill", pieColor[modifier]);
+            .style("fill", PIE_COLOR[modifier]);
     }
 }
 
@@ -427,7 +467,7 @@ function showRelationship(d) {
     currSchool = d.id; // preserve node info for applying filters
 
     if (cachedData) {
-        $('.backBtn').css("visibility", "visible")
+        $('#backBtn').css("visibility", "visible").css("background-color", "#8ed8f8")
 
         renderReset();
 
@@ -438,6 +478,18 @@ function showRelationship(d) {
 function renderRelationshipView(school, graph) {
     isRelationshipView = true;
 
+    // width = window.innerWidth - $('#slide-out').outerWidth();
+    // height = window.innerHeight;
+    width = 1400;
+    height = 1200;
+
+    svg = d3.select("#graph")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        ;
+
     if (currContract === "all") {
         renderNodeLinkDonut(school, graph);
     } else {
@@ -447,14 +499,14 @@ function renderRelationshipView(school, graph) {
 
 function renderNodeLinkDonut(school, graph) {
     simulation = d3.forceSimulation()
-        .force("charge", d3.forceManyBody().strength(-3000))
-        .force("collide", d3.forceCollide(function(d) {
-            return 8;
-        }).iterations(10))
+        .force("charge", d3.forceManyBody().strength(CHARGE_STR))
+        // .force("collide", d3.forceCollide(function(d) {
+        //     return 8;
+        // }).iterations(4))
         .force("link", d3.forceLink().id(function(d) {
             return d.id;
-        }).distance(200))
-        .force("center", d3.forceCenter(width / 3, height / 3))
+        }).distance(LINK_DIST))
+        .force("center", d3.forceCenter(width / W_FACTOR, height / H_FACTOR))
         .alpha(0.6);
 
     if (!school) return;
@@ -481,18 +533,10 @@ function renderNodeLinkDonut(school, graph) {
         if (n.id === school) nodes.push(clone(n));
     });
 
-    // nodes = nodes.sort(function(a, b) {
-    //     return b.size - a.size;
-    // });
-
-    // links = links.sort(function(a, b) {
-    //     return b.total - a.total;
-    // });
-
     var legend = d3.select(".vizuly").append("svg")
         .attr("class", "legend")
-        .attr("width", 120)
-        .attr("height", (3) * 20)
+        .attr("width", 400)
+        .attr("height", 120)
         .selectAll("g")
         .data(graph.nodes[0].paths)
         .enter().append("g")
@@ -501,20 +545,74 @@ function renderNodeLinkDonut(school, graph) {
         });
 
     legend.append("rect")
-        .attr("width", 18)
-        .attr("height", 18)
+        .attr("width", SOLID_W)
+        .attr("height", SOLID_H)
         .style("fill", function(d) {
             return color(d.type);
-        })
-        .style("opacity", "0.5");
+        });
 
     legend.append("text")
-        .attr("x", 24)
+        .attr("x", SOLID_W+8)
         .attr("y", 9)
         .attr("dy", ".35em")
         .text(function(d) {
-            return d.type;
+            return LEG_TEXT[d.type];
         });
+
+    var heatMap = d3.select(".vizuly").select(".legend")
+        .append("g")
+        .attr("id", "heatmap")
+        .attr("transform", "translate(0," + 80 + ")")
+        ;
+    // legend for links
+    var lg = heatMap.append('linearGradient')
+        .attr('id', 'Gradient2')
+        .attr('x1', 1)
+        .attr('x2', 0)
+        .attr('y1', 0)
+        .attr('y2', 0);
+
+    lg.append('stop')
+        .attr('offset', '0%')
+        .attr('stop-color', '#660066');
+
+    lg.append('stop')
+        .attr('offset', '100%')
+        .attr('stop-color', '#f7e6f7');
+
+    heatMap.append('rect')
+        .attr('x', 0)
+        .attr('y', 9)
+        .attr('width', HEATMAP_W)
+        .attr('height', HEATMAP_H)
+        .style("fill", "url(#Gradient2)");
+
+    // add text for legend title
+    heatMap.append("text")
+        .attr("x", HEATMAP_W+8)
+        .attr("y", HEATMAP_H)
+        .attr("dy", ".35em")
+        .text("Number of Agreements");
+
+    // add text for min value
+    heatMap.append("text")
+        .attr("x", 6)
+        .attr("y", 0)
+        .attr("dy", ".35em")
+        .style("text-anchor", "middle")
+        .text("0");
+
+    var hmMax = d3.max(links.map(function(d) {
+        return d.total;
+    }));
+
+    // add text for max value
+    heatMap.append("text")
+        .attr("x", HEATMAP_W)
+        .attr("y", 0)
+        .attr("dy", ".35em")
+        .style("text-anchor", "middle")
+        .text(hmMax);
 
     var link = svg.append("g")
         .attr("class", "links")
@@ -527,8 +625,7 @@ function renderNodeLinkDonut(school, graph) {
             return d.total * 0.05
         });
 
-    var node = svg
-        .append("g")
+    var node = svg.append("g")
         .attr("class", "nodes")
         .selectAll(".nodes")
         .data(nodes)
@@ -538,14 +635,50 @@ function renderNodeLinkDonut(school, graph) {
         .on("mouseout", removeInfo)
         ;
 
+    // center white circle
     node.append("circle")
         .attr("r", function(d) {
-            return radius(d.size * 0.55);
+            return nodeLinkRadius(d.size * 0.55);
         })
-        .attr("fill", "#fff");
+        .attr("fill", "#fff")
+        ;
+
+    if (ZOOM_ON) {
+        d3.select("#graph").select("svg").append("rect") // zoom box
+            .attr("width", width)
+            .attr("height", height)
+            .style("fill", "none")
+            .style("pointer-events", "all")
+            .call(zoomScale.on("zoom", function() {
+                d3.select("#graph").select("svg").select("g")
+                    .attr("transform", d3.event.transform)
+                    ;
+            })) // enable zoom
+            ;
+    }
+
+    // center label
+    // var label = node.append("text")
+    //     .attr("class", "label");
+    //
+    // label.append("tspan")
+    //     .attr("class", "label-name")
+    //     .attr("x", -20)
+    //     .attr("dy", "-.2em")
+    //     .text(function(d) {
+    //         if (d.id == school) return d.id
+    //     });
+    //
+    // label.append("tspan")
+    //     .attr("class", "label-value")
+    //     .attr("x", -20)
+    //     .attr("dy", "1.1em")
+    //     .text(function(d) {
+    //         if (d.id == school) return d.size
+    //     });
 
     function multiple(d) {
-        var outerRadius = radius(d.size);
+        var outerRadius = nodeLinkRadius(d.size);
         if (outerRadius <= minRadius) {
             outerRadius = minRadius;
         }
@@ -553,9 +686,9 @@ function renderNodeLinkDonut(school, graph) {
         var innerRadius = outerRadius * 0.7;
 
         var subsvg = d3.select(this)
-            // .attr("r", function(d){return radius(d.size)})
             .attr("width", outerRadius * 2)
             .attr("height", outerRadius * 2)
+            .attr("margin", "10px")
             .append("g");
 
         var g = subsvg.selectAll(".arc")
@@ -566,7 +699,8 @@ function renderNodeLinkDonut(school, graph) {
             .attr("class", "arc")
             .attr("id", function(d, i) {
                 return "path" + d.data.type + i;
-            });
+            })
+            ;
 
         var path = g.append("path")
             .attr("d", arc.outerRadius(outerRadius).innerRadius(innerRadius).padAngle(0.03))
@@ -620,14 +754,14 @@ function renderNodeLinkPie(school, graph) {
     }
 
     simulation = d3.forceSimulation()
-        .force("charge", d3.forceManyBody().strength(-3000))
-        .force("collide", d3.forceCollide(function(d) {
-            return 8;
-        }).iterations(10))
+        .force("charge", d3.forceManyBody().strength(CHARGE_STR))
+        // .force("collide", d3.forceCollide(function(d) {
+        //     return 8;
+        // }).iterations(10))
         .force("link", d3.forceLink().id(function(d) {
             return d.id;
-        }).distance(200))
-        .force("center", d3.forceCenter(width / 3, height / 3))
+        }).distance(LINK_DIST))
+        .force("center", d3.forceCenter(width / PIE_W_FACTOR, height / PIE_H_FACTOR))
         .alpha(0.6);
 
     if (!school) return;
@@ -668,6 +802,67 @@ function renderNodeLinkPie(school, graph) {
         }
     });
 
+    var legend = d3.select(".vizuly").append("svg")
+        .attr("class", "legend")
+        .attr("width", 400)
+        .attr("height", 120)
+        ;
+
+    var heatMap = d3.select(".vizuly").select(".legend")
+        .append("g")
+        .attr("id", "heatmap")
+        .attr("transform", "translate(0," + 80 + ")")
+        ;
+    // legend for links
+    var lg = heatMap.append('linearGradient')
+        .attr('id', 'Gradient2')
+        .attr('x1', 1)
+        .attr('x2', 0)
+        .attr('y1', 0)
+        .attr('y2', 0);
+
+    lg.append('stop')
+        .attr('offset', '0%')
+        .attr('stop-color', '#660066');
+
+    lg.append('stop')
+        .attr('offset', '100%')
+        .attr('stop-color', '#f7e6f7');
+
+    heatMap.append('rect')
+        .attr('x', 0)
+        .attr('y', 9)
+        .attr('width', HEATMAP_W)
+        .attr('height', HEATMAP_H)
+        .style("fill", "url(#Gradient2)");
+
+    // add text for legend title
+    heatMap.append("text")
+        .attr("x", HEATMAP_W+8)
+        .attr("y", HEATMAP_H)
+        .attr("dy", ".35em")
+        .text("Number of Agreements");
+
+    // add text for min value
+    heatMap.append("text")
+        .attr("x", 6)
+        .attr("y", 0)
+        .attr("dy", ".35em")
+        .style("text-anchor", "middle")
+        .text("0");
+
+    var hmMax = d3.max(links.map(function(d) {
+        return d[currContract];
+    }));
+
+    // add text for max value
+    heatMap.append("text")
+        .attr("x", HEATMAP_W)
+        .attr("y", 0)
+        .attr("dy", ".35em")
+        .style("text-anchor", "middle")
+        .text(hmMax);
+
     var link = svg.append("g")
         .attr("class", "links")
         .selectAll("line")
@@ -707,7 +902,7 @@ function renderNodeLinkPie(school, graph) {
             .append("circle")
             .attr("class", "pie")
             .attr("r", r)
-            .style("fill", pieColor[currContract])
+            .style("fill", PIE_COLOR[currContract])
             ;
     }
 

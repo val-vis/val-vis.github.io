@@ -14,7 +14,7 @@
     <script src="lib/d3.min.js"></script>
 </head>
 
-<body onload="">
+<body>
 <!-- This is our Materialize.css settings panel on the left side of the test container -->
 <ul id="slide-out" class="side-nav fixed" >
     <li class="logo">
@@ -55,11 +55,10 @@
 
 <!-- Our main content container-->
 <main>
-    <div class="container">
-        <a class="waves-effect waves-light btn backBtn" onclick="resumeMainView()">Back</a>
+    <div id="viz_container" class="z-depth-0">
+        <div><a id="backBtn" class="waves-effect waves-light btn" onclick="resumeMainView()">Back</a></div>
+        <div class="vizuly fixed"></div>
         <div id="graph"></div>
-        <div class="chart"></div>
-        <div class="vizuly"></div>
     </div>
 </main>
 <script src="main.js"></script>

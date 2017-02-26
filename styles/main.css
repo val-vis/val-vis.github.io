@@ -1,3 +1,4 @@
+/* leave space for side navigation panel */
 @media only screen {
     main {
         padding-left:210px;
@@ -12,47 +13,20 @@
 }
 
 path {
-/*stroke: #0d0d0d;*/
-cursor: pointer;
-transition: fill 250ms;
+    cursor: pointer;
+    transition: fill 250ms;
 }
 
 path:hover {
-  /* stroke-width: 10px; */
-  /*fill: #fff;*/
-  fill-opacity: 0.5;
+    fill-opacity: 0.5;
+}
+
+body {
+    overflow-x: hidden;
 }
 
 main {
-    margin-top: -85px;
-}
-
-.chart {
-    position: absolute;
-    top:0;
-    padding: 20px;
-    /*top:20%;
-    left: 30%;
-    margin: 0 auto;*/
-}
-
-#graph {
-    /*top:20%;
-    left: 30%;
-    margin: 0 auto;*/
-    padding: 20px;
-}
-
-.backBtn {
-    position: absolute;
-    bottom: 20px;
-    left: 250px;
-    visibility: hidden;
-}
-
-.legend {
-  vertical-align: top;
-  margin-right: 40px;
+    margin-top: -70px;
 }
 
 .tile {
@@ -65,10 +39,6 @@ main {
     font-weight:300;
 }
 
-.side-nav li:hover {
-    /*background-color:#FFF;*/
-}
-
 .side-nav .logo {
     margin-top: 20px;
 }
@@ -77,33 +47,55 @@ main {
     font-weight:200;
 }
 
-.datatip-value {
-    position:absolute;
-    right:10px;
-}
-
 .title {
     font-family: "Roboto";
     font-size: 20px;
     font-weight:200;
 }
 
-.container {
+div.container {
     width:100%;
+    top:100px;
+}
+
+#viz_container {
+    /*width:100%;
+    top:100px;*/
 }
 
 .vizuly {
     font-family: "Raleway";
     font-size:1.3em;
     text-align:right;
-    position: absolute;
-    bottom: 20px;
+    position: fixed;
+    bottom: 0;
     right: 0;
+}
+
+#graph {
+    padding: 20px;
+}
+
+#graph.svg{
+    /*display: inline-block;*/
+    /*margin: auto;*/
+}
+
+.legend {
+    vertical-align: top;
+}
+
+#backBtn {
+    position:absolute;
+    background-color: #8ed8f8;
+    top: 15px;
+    left: 230px;
+    visibility: hidden;
 }
 
 svg {
     border-radius: 4px;
-    shape-rendering: crispEdges;
+    margin:10px;
 }
 
 .vz-data-point {
