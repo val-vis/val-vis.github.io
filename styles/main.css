@@ -57,20 +57,6 @@ div.container {
     top:100px;
 }
 
-#viz_container {
-    /*width:100%;
-    top:100px;*/
-}
-
-.vizuly {
-    font-family: "Raleway";
-    font-size:1.3em;
-    text-align:right;
-    position: fixed;
-    bottom: 0;
-    right: 0;
-}
-
 #graph {
     padding: 20px;
 }
@@ -93,35 +79,47 @@ svg {
     margin:10px;
 }
 
-.vz-data-point {
-    fill-opacity:1;
-    stroke-width: 1px;
-    stroke-opacity:1;
+.node {
+  stroke: #000;
+  stroke-width: 1.5px;
 }
 
-.vz-tip-hover {
+.link {
+  stroke: #999;
+  stroke-width: 1.5px;
+}
+
+/* Side panel CSS */
+div.settings-label {
+    border-top: 1px solid #000;
+    margin-top:10px;
+    margin-bottom:40px;
     font-weight:300;
 }
 
-.vz-tip-hover text{
-    opacity:.8;
+div.settings-label p{
+  font-size:16px;
+  color:#0E4580;
 }
 
-.my-tip {
-    font-family:Raleway;
-    font-weight:300;
-    text-anchor:middle;
+div#institution-info {
+    position: absolute;
+    width: 220px;
+    height: 140px;
 }
 
-/* MATERIAL.CSS */
-
-[type="radio"]:checked + label:after {
-    background-color:#448AFF;
-    border-color: #3864c9;
+#institution-info p {
+    color: #030E19;
 }
 
-[type="radio"] + label {
-    border-color: #3864c9;
+#institution-info p#school-title {
+    font-size: 16px;
+    font-weight: 800;
+}
+
+#institution-info p#school-data {
+    font-size: 14px;
+    font-weight: 400;
 }
 
 .legendBox {
@@ -156,6 +154,16 @@ svg {
     top: 420px;
 }
 
+/* MATERIAL.CSS */
+[type="radio"]:checked + label:after {
+    background-color:#448AFF;
+    border-color: #3864c9;
+}
+
+[type="radio"] + label {
+    border-color: #3864c9;
+}
+
 .dropdown-content {
     font-family:"Roboto";
     font-size:.5em;
@@ -166,103 +174,10 @@ svg {
     font-size:1.75em;
 }
 
-div.input-field label {
-    margin-left:-10px;
-}
-
 .mdi-navigation-menu {
     font-size:30px;
     color:#444;
 }
-
-div.settings-label {
-    border-top: 1px solid #000;
-    margin-top:10px;
-    margin-bottom:40px;
-    font-weight:300;
-}
-
-div.settings-label p{
-  font-size:16px;
-  color:#0E4580;
-}
-
-div#institution-info {
-    position: absolute;
-    width: 220px;
-    height: 140px;
-}
-
-#institution-info p {
-    color: #030E19;
-}
-
-#institution-info p#school-title {
-    font-size: 16px;
-    font-weight: 800;
-}
-
-#institution-info p#school-data {
-    font-size: 14px;
-    font-weight: 400;
-}
-
-div.tooltip {
-    position: absolute;
-    text-align: left;
-    pointer-events: none;
-    width: 400px;
-    padding: 10px;
-    border: 1px solid #D5D5D5;
-    font-family: arial,helvetica,sans-serif;
-    font-size: 1.1em;
-    color: #333;
-    padding: 10px;
-    border-radius: 3px;
-    background: rgba(255,255,255,0.9);
-    color: #000;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-    -moz-box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-    border:1px solid rgba(200,200,200,0.85);
-}
-
-
-.header-rule{
-    height:1px;
-    margin:1px auto 3px;
-    margin-top:7px;
-    margin-bottom:7px;
-    background:#ddd;
-    width:125px;
-}
-
-.header1{
-    color:#000;
-    text-transform:uppercase;
-    font-size: 12px;
-    margin-bottom: 2px;
-    text-align:center;
-}
-
-.header2 {
-    text-transform: uppercase;
-    text-align: left;
-    font-size: 14px;
-    margin-bottom: 2px;
-    color:#666;
-    text-align:center;
-}
-
-.header3 {
-    color:#333;
-    text-align: left;
-    font-size: 15px;
-    font-style: italic;
-    font-family: Georgia;
-    /*  width:170px;*/
-    text-align:center;
-}
-
 
 i.mdi-navigation-menu:before {
     font-size:40px;
@@ -271,14 +186,4 @@ i.mdi-navigation-menu:before {
 i.mdi-navigation-menu:hover {
     transition: color 0.5s ease;
     color: #0176B4;
-}
-
-.node {
-  stroke: #000;
-  stroke-width: 1.5px;
-}
-
-.link {
-  stroke: #999;
-  stroke-width: 1.5px;
 }

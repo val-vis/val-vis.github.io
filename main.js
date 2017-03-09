@@ -1,6 +1,6 @@
 /* This script will be executed once page is loaded */
 // html element that holds the chart
-var viz_container;
+var graph_container;
 
 /* data loading */
 var dataMap = d3.map();
@@ -18,7 +18,6 @@ var isRelationshipView = false;
 /* d3 initialization */
 // reset DOM
 d3.select("#graph").selectAll("*").remove();
-// svg.attr("display", "block").attr("margin","10px");
 var width = 0;
 var height = 0;
 var svg = null;
@@ -95,7 +94,7 @@ var zoomScale = d3.zoom().scaleExtent([min_zoom,max_zoom]);
 /* materialcss init */
 $('select').material_select(); //Materialize.css setup
 $(".button-collapse").sideNav({menuWidth:240});
-viz_container = d3.selectAll("#viz_container")
+graph_container = d3.selectAll("#graph_container")
     .style("width", "screenWidth" + "px")
     .style("height","screenHeight" + "px");
 
@@ -116,16 +115,12 @@ $(window).resize(function() {
     windowResize();
 });
 
-// $(window).mousedown(function() {
-//     console.log("Mouse click trigger!");
-// });
-
 renderChart("2016", "", isRelationshipView);
 
 setTimeout(windowResize, 50);
 
 function windowResize() {
-    var availHeight = window.innerHeight - $('.vizuly').outerHeight(true);
+    var availHeight = window.innerHeight - $('#graph').outerHeight(true);
     var availWidth = window.innerWidth - $('#slide-out').outerWidth();
 
     var graphWidth = $('#graph').outerWidth();
@@ -142,19 +137,6 @@ function windowResize() {
         // $('#graph').css("transform", "translate(-50%, -50%) scale(" + scaleFactor + ")");
     }
 }
-
-/******* Test *******/
-// testRelationshipView("2016", "Algonquin");
-
-function testRelationshipView(year, school) {
-    d3.json(dataMap.get(year), function(error, data) {
-        if (error) throw error;
-        cachedData = data;
-        renderReset();
-        renderRelationshipView(school, cachedData);
-    });
-}
-/******* Test *******/
 
 /*
 For filtering year
@@ -195,8 +177,7 @@ function resumeMainView() {
 /* Erase graph */
 function renderReset() {
     d3.select("#graph").selectAll("*").remove();
-    // d3.select("#viz_container").select("#chart").selectAll("*").remove();
-    d3.select("#viz_container").select(".vizuly").selectAll("*").remove();
+    // d3.select("#graph_container").select("#chart").selectAll("*").remove();
     d3.select(".legendBox").selectAll("*").remove();
 }
 
@@ -255,23 +236,27 @@ function renderChart(year, contract, isRelationshipView) {
 }
 
 function donutInfo(d) {
+    var type = d.type;
+
     var label = d3.select("#institution-info")
         .append("p")
         .attr("id", "school-title")
         .text(d.id)
         .append("p")
         .attr("id", "school-data")
-        .text("Total sending agreements: " + d.size);
+        .text("Total " + type + " agreements: " + d.size);
 }
 
 function pieInfo(d) {
+    var type = d.type;
+
     var label = d3.select("#institution-info")
         .append("p")
         .attr("id", "school-title")
         .text(d.id)
         .append("p")
         .attr("id", "school-data")
-        .text("Sending agreements: " + d.count);
+        .text("Total " + type + " agreements: " + d.count);
 }
 
 function removeInfo() {
@@ -303,7 +288,7 @@ function renderMultipleDonutView(data) {
 
     color.domain(sendingNodes);
 
-    var chart = d3.select("#viz_container").select("#graph")
+    var chart = d3.select("#graph_container").select("#graph")
         // .attr("width", '100%')
         // .attr("height", '100%')
         // .attr('viewBox','0 0 '+Math.min(width,height) +' '+Math.min(width,height) )
@@ -439,11 +424,12 @@ function renderMultiplePieView(modifier, data) {
     data.nodes[0].sending.forEach((d) => {
         pieData.push({
             id: d.id,
-            count: getContractCount(d, modifier)
+            count: getContractCount(d, modifier),
+            type: "sending"
         });
     });
 
-    var chart = d3.select("#viz_container").select("#graph");
+    var chart = d3.select("#graph_container").select("#graph");
 
     var chart = chart.selectAll(".pie")
         .data(pieData.sort(function(a, b) {
@@ -805,7 +791,8 @@ function renderNodeLinkPie(school, graph) {
         if (target) {
             nodes.push({
                 id: target.id,
-                count: getContractCount(target, currContract)
+                count: getContractCount(target, currContract),
+                type: "receiving"
             });
         }
     });
@@ -814,7 +801,8 @@ function renderNodeLinkPie(school, graph) {
         if (n.id === school) {
             nodes.push({
                 id: n.id,
-                count: getContractCount(n, currContract)
+                count: getContractCount(n, currContract),
+                type: "sending"
             });
         }
     });
