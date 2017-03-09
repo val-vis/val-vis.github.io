@@ -30,7 +30,8 @@ var radius = d3.scaleSqrt()
 var nodeLinkRadius = d3.scaleSqrt()
     .range([0, 1.2]);
 
-var minRadius = 5;
+const MIN_RADIUS = 5;
+const MAX_RADIUS = radius(3000);
 
 var donutRadius = d3.scaleSqrt() // radius for donuts
     .range([0, 60]);
@@ -54,20 +55,25 @@ const LEG_TEXT = {
 
 const ZOOM_ON = false;
 
+const NODE_LINK_W = 1400;
+const NODE_LINK_H = 1000;
+
 /* Simulation parameters */
 const CHARGE_STR = -3000;
-const LINK_DIST = 60;
+const LINK_DIST = 120;
 
 /* For calculating force starting position */
-const W_FACTOR = 3; // width factor
-const H_FACTOR = 2.5; // height factor
+const W_FACTOR = 2.5; // width factor
+const H_FACTOR = 2; // height factor
 const PIE_W_FACTOR = 2.8;
-const PIE_H_FACTOR = 2.8;
+const PIE_H_FACTOR = 1.8;
 
 /* Legend dimensions */
-const SOLID_W = 120;
+const LEGEND_BOX_W = 400;
+const LEGEND_BOX_H = 120;
+const SOLID_W = 60;
 const SOLID_H = 18;
-const HEATMAP_W = 120;
+const HEATMAP_W = 60;
 const HEATMAP_H = 20;
 
 var arc = d3.arc();
@@ -88,16 +94,21 @@ var zoomScale = d3.zoom().scaleExtent([min_zoom,max_zoom]);
 
 /* materialcss init */
 $('select').material_select(); //Materialize.css setup
-$(".button-collapse").sideNav({menuWidth:210});
+$(".button-collapse").sideNav({menuWidth:240});
 viz_container = d3.selectAll("#viz_container")
     .style("width", "screenWidth" + "px")
     .style("height","screenHeight" + "px");
 
 /* Fix back button */
 var topOffset = parseInt($("#backBtn").css('top'));
+var leftOffset = parseInt($("#backBtn").css('left'));
 $(window).scroll(function(){
     $('#backBtn').css({
         'top': $(this).scrollTop() + topOffset
+    });
+
+    $('#backBtn').css({
+        'left': $(this).scrollLeft() + leftOffset
     });
 });
 
@@ -186,6 +197,7 @@ function renderReset() {
     d3.select("#graph").selectAll("*").remove();
     // d3.select("#viz_container").select("#chart").selectAll("*").remove();
     d3.select("#viz_container").select(".vizuly").selectAll("*").remove();
+    d3.select(".legendBox").selectAll("*").remove();
 }
 
 /* Render visualization based on the filter values */
@@ -244,7 +256,7 @@ function renderChart(year, contract, isRelationshipView) {
 
 function donutInfo(d) {
     var label = d3.select("#institution-info")
-        .append("h4")
+        .append("p")
         .attr("id", "school-title")
         .text(d.id)
         .append("p")
@@ -254,7 +266,7 @@ function donutInfo(d) {
 
 function pieInfo(d) {
     var label = d3.select("#institution-info")
-        .append("h4")
+        .append("p")
         .attr("id", "school-title")
         .text(d.id)
         .append("p")
@@ -280,12 +292,16 @@ function renderMultipleDonutView(data) {
     isRelationshipView = false;
 
     var nodes = data.nodes;
+    var sendingNodes = nodes[0].sending;
+    var receivingNodes = nodes[0].receiving;
 
-    donutRadius.domain([0, d3.max(nodes, function(d) {
+    var sendingMax = d3.max(sendingNodes, function(d) {
         return d.size;
-    })]);
+    });
 
-    color.domain(nodes);
+    donutRadius.domain([0, sendingMax]);
+
+    color.domain(sendingNodes);
 
     var chart = d3.select("#viz_container").select("#graph")
         // .attr("width", '100%')
@@ -297,7 +313,7 @@ function renderMultipleDonutView(data) {
         ;
 
     var svg = chart.selectAll(".pie")
-        .data(nodes.sort(function(a, b) {
+        .data(sendingNodes.sort(function(a, b) {
             return b.size - a.size;
         }))
         .enter().append("svg")
@@ -308,12 +324,12 @@ function renderMultipleDonutView(data) {
         .on("click", showRelationship)
         .select("g");
 
-    var legend = d3.select(".vizuly").append("svg")
+    var legend = d3.select(".legendBox").append("svg")
         .attr("class", "legend")
-        .attr("width", 400)
-        .attr("height", 80)
+        .attr("width", LEGEND_BOX_W)
+        .attr("height", LEGEND_BOX_H)
         .selectAll("g")
-        .data(nodes[0].paths)
+        .data(sendingNodes[0].paths)
         .enter().append("g")
         .attr("transform", function(d, i) {
             return "translate(0," + i * 20 + ")";
@@ -420,7 +436,7 @@ function renderMultiplePieView(modifier, data) {
 
     var pieData = [];
 
-    data.nodes.forEach((d) => {
+    data.nodes[0].sending.forEach((d) => {
         pieData.push({
             id: d.id,
             count: getContractCount(d, modifier)
@@ -478,10 +494,8 @@ function showRelationship(d) {
 function renderRelationshipView(school, graph) {
     isRelationshipView = true;
 
-    // width = window.innerWidth - $('#slide-out').outerWidth();
-    // height = window.innerHeight;
-    width = 1400;
-    height = 1200;
+    width = NODE_LINK_W;
+    height = NODE_LINK_H;
 
     svg = d3.select("#graph")
         .append("svg")
@@ -520,7 +534,8 @@ function renderNodeLinkDonut(school, graph) {
     });
 
     links.forEach(function(l) {
-        var target = graph.nodes.find(function(n) {
+        // get all receiving data
+        var target = graph.nodes[0].receiving.find(function(n) {
             return l.target === n.id;
         });
 
@@ -529,16 +544,17 @@ function renderNodeLinkDonut(school, graph) {
         }
     });
 
-    graph.nodes.forEach(function(n) {
+    // get the sending school's data
+    graph.nodes[0].sending.forEach(function(n) {
         if (n.id === school) nodes.push(clone(n));
     });
 
-    var legend = d3.select(".vizuly").append("svg")
+    var legend = d3.select(".legendBox").append("svg")
         .attr("class", "legend")
-        .attr("width", 400)
-        .attr("height", 120)
+        .attr("width", LEGEND_BOX_W)
+        .attr("height", LEGEND_BOX_H)
         .selectAll("g")
-        .data(graph.nodes[0].paths)
+        .data(nodes[0].paths)
         .enter().append("g")
         .attr("transform", function(d, i) {
             return "translate(0," + i * 20 + ")";
@@ -559,7 +575,7 @@ function renderNodeLinkDonut(school, graph) {
             return LEG_TEXT[d.type];
         });
 
-    var heatMap = d3.select(".vizuly").select(".legend")
+    var heatMap = d3.select(".legendBox").select(".legend")
         .append("g")
         .attr("id", "heatmap")
         .attr("transform", "translate(0," + 80 + ")")
@@ -679,8 +695,9 @@ function renderNodeLinkDonut(school, graph) {
 
     function multiple(d) {
         var outerRadius = nodeLinkRadius(d.size);
-        if (outerRadius <= minRadius) {
-            outerRadius = minRadius;
+
+        if (outerRadius <= MIN_RADIUS) {
+            outerRadius = MIN_RADIUS;
         }
 
         var innerRadius = outerRadius * 0.7;
@@ -756,8 +773,8 @@ function renderNodeLinkPie(school, graph) {
     simulation = d3.forceSimulation()
         .force("charge", d3.forceManyBody().strength(CHARGE_STR))
         // .force("collide", d3.forceCollide(function(d) {
-        //     return 8;
-        // }).iterations(10))
+        //     return 50;
+        // }).iterations(20))
         .force("link", d3.forceLink().id(function(d) {
             return d.id;
         }).distance(LINK_DIST))
@@ -781,7 +798,7 @@ function renderNodeLinkPie(school, graph) {
     });
 
     links.forEach(function(l) {
-        var target = graph.nodes.find(function(n) {
+        var target = graph.nodes[0].receiving.find(function(n) {
             return l.target === n.id;
         });
 
@@ -793,7 +810,7 @@ function renderNodeLinkPie(school, graph) {
         }
     });
 
-    graph.nodes.forEach(function(n) {
+    graph.nodes[0].sending.forEach(function(n) {
         if (n.id === school) {
             nodes.push({
                 id: n.id,
@@ -802,13 +819,13 @@ function renderNodeLinkPie(school, graph) {
         }
     });
 
-    var legend = d3.select(".vizuly").append("svg")
+    var legend = d3.select(".legendBox").append("svg")
         .attr("class", "legend")
-        .attr("width", 400)
-        .attr("height", 120)
+        .attr("width", LEGEND_BOX_W)
+        .attr("height", LEGEND_BOX_H)
         ;
 
-    var heatMap = d3.select(".vizuly").select(".legend")
+    var heatMap = d3.select(".legendBox").select(".legend")
         .append("g")
         .attr("id", "heatmap")
         .attr("transform", "translate(0," + 80 + ")")
@@ -886,15 +903,19 @@ function renderNodeLinkPie(school, graph) {
         ;
 
     function multiple(d) {
-        circleScale.domain([0, d3.max(nodes, function(d) {
+        var maxVal = d3.max(nodes, function(d) {
             return d.count;
-        })]);
+        });
+
+        circleScale.domain([0, maxVal]);
 
         var r = radius(d.count);
 
-        if (r <= minRadius) {
-            r = minRadius;
+        if (r <= MIN_RADIUS) {
+            r = MIN_RADIUS;
         }
+
+        r = Math.min(r, MAX_RADIUS);
 
         var subsvg = d3.select(this)
             .attr("width", r * 2)

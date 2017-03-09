@@ -1,7 +1,7 @@
 /* leave space for side navigation panel */
 @media only screen {
     main {
-        padding-left:210px;
+        padding-left:240px;
     }
 }
 
@@ -22,7 +22,6 @@ path:hover {
 }
 
 body {
-    overflow-x: hidden;
 }
 
 main {
@@ -81,15 +80,11 @@ div.container {
     /*margin: auto;*/
 }
 
-.legend {
-    vertical-align: top;
-}
-
 #backBtn {
     position:absolute;
     background-color: #8ed8f8;
     top: 15px;
-    left: 230px;
+    left: 260px;
     visibility: hidden;
 }
 
@@ -129,22 +124,36 @@ svg {
     border-color: #3864c9;
 }
 
+.legendBox {
+    width: 180px;
+    position: absolute;
+    top: 550px;
+}
+
+.legendBox svg {
+    margin-left: -4px;
+}
+
+.legend {
+    font-size: 14px;
+}
+
 .input-field {
     margin-left: 0px;
     padding-bottom: 5px;
     font-family: "Roboto";
-    position: absolute;
-    bottom: 140px;
 }
 
 .input-field.data-filter {
+    width: 180px;
     position: absolute;
-    bottom: 100px;
+    top: 340px;
 }
 
 .input-field.contract-filter {
+    width: 180px;
     position: absolute;
-    bottom: 180px;
+    top: 420px;
 }
 
 .dropdown-content {
@@ -168,15 +177,20 @@ div.input-field label {
 
 div.settings-label {
     border-top: 1px solid #000;
-    padding-top: 10px;
     margin-top:10px;
     margin-bottom:40px;
     font-weight:300;
 }
 
 div.settings-label p{
-  font-size:23px;
+  font-size:16px;
   color:#0E4580;
+}
+
+div#institution-info {
+    position: absolute;
+    width: 220px;
+    height: 140px;
 }
 
 #institution-info p {
@@ -184,11 +198,13 @@ div.settings-label p{
 }
 
 #institution-info p#school-title {
-    font-size: 20px;
+    font-size: 16px;
+    font-weight: 800;
 }
 
 #institution-info p#school-data {
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: 400;
 }
 
 div.tooltip {
