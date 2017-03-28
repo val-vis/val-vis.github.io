@@ -7,8 +7,9 @@ var filePath = "data/full.json";
 
 const DEPTH_FACTOR = 200; // link distance
 const WIDTH = 2000;
-const HEIGHT = 1000;
+const HEIGHT = 1200;
 const DURATION = 400;
+const ZOOM_MAX = 8;
 
 var margin = {
         top: 20,
@@ -34,7 +35,7 @@ var diagonal = d3.svg.diagonal()
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.right + margin.left)
     .attr("height", height + margin.top + margin.bottom)
-    .call(zm = d3.behavior.zoom().scaleExtent([1,3]).on("zoom", redraw)) // zoom
+    .call(zm = d3.behavior.zoom().scaleExtent([1,ZOOM_MAX]).on("zoom", redraw)) // zoom
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
