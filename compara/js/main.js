@@ -2,22 +2,29 @@
 var filePath = "data/full.json";
 
 /* Original Code: https://bl.ocks.org/mbostock/4339083 */
+/* Zoom: http://jsfiddle.net/augburto/YMa2y/ */
 /* Initial config */
+
+const DEPTH_FACTOR = 200; // link distance
+const WIDTH = 2000;
+const HEIGHT = 1000;
+const DURATION = 400;
+
 var margin = {
         top: 20,
         right: 120,
         bottom: 20,
         left: 120
     },
-    width = 960 - margin.right - margin.left,
-    height = 800 - margin.top - margin.bottom;
+    width = WIDTH - margin.right - margin.left,
+    height = HEIGHT - margin.top - margin.bottom;
 
 var i = 0,
-    duration = 750,
     root;
 
 var tree = d3.layout.tree()
     .size([height, width]);
+    // .nodeSize([4, 2]);
 
 var diagonal = d3.svg.diagonal()
     .projection(function(d) {
@@ -27,8 +34,12 @@ var diagonal = d3.svg.diagonal()
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.right + margin.left)
     .attr("height", height + margin.top + margin.bottom)
+    .call(zm = d3.behavior.zoom().scaleExtent([1,3]).on("zoom", redraw)) // zoom
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+//necessary so that zoom knows where to zoom and unzoom from
+zm.translate([350, 20]);
 
 var nid = 1; // node id
 var relationships = {};
@@ -37,7 +48,7 @@ d3.json(filePath, function(error, data) {
     if (error) throw error;
 
     root = {
-        "name": "root",
+        "name": "Comparative Toolsets",
         "children": []
     };
 
@@ -45,8 +56,9 @@ d3.json(filePath, function(error, data) {
     root.x0 = height / 2;
     root.y0 = 0;
 
-    root.children.forEach(collapse);
-    update(root);
+    expandAll();
+    // root.children.forEach(collapse);
+    // update(root);
 
     d3.select(self.frameElement).style("height", "800px");
 
@@ -76,28 +88,44 @@ d3.json(filePath, function(error, data) {
                 var leaf = d.children[0].children[0];
                 leaf.nid = getNewId(); // assign new id
 
-                // construct occurrence mapping of each attribute
-                // for (var attr in leaf) {
-                //     if (attr !== "name") {
-                //         if (!relationships[attr]) {
-                //             var attrMap = {};
-                //
-                //             if (leaf[attr]) {
-                //                 var keywords = leaf[attr].split(',');
-                //
-                //                 for (var kw in keywords) {
-                //                     attrMap[kw] = [leaf.nid];
-                //                 }
-                //             } else { // the value for this attribute is empty
-                //                 attrMap[attr] = null;
-                //             }
-                //
-                //             relationships[attr] = attrMap;
-                //         } else {
-                //
-                //         }
-                //     }
-                // }
+                // construct relationship mappings
+                for (var attr in leaf) {
+                    if ((attr !== "name") && (attr !== "nid")) {
+                        if (!relationships[attr]) {
+                            var attrMap = {};
+
+                            if (leaf[attr]) {
+                                var keywords = leaf[attr].split(',');
+
+                                for (var i in keywords) {
+                                    kw = keywords[i].replace(/^\s+|\s+$/gm,''); // trim space
+                                    attrMap[kw] = [leaf.nid];
+                                }
+                            } else { // the value for this attribute is empty
+                                attrMap[attr] = null;
+                            }
+
+                            relationships[attr] = attrMap;
+                        } else {
+                            var attrMap = relationships[attr];
+
+                            if (leaf[attr]) { // there are values
+                                var keywords = leaf[attr].split(',');
+
+                                for (var i in keywords) {
+                                    kw = keywords[i].replace(/^\s+|\s+$/gm,''); // trim space
+
+                                    if (!attrMap[kw]) { // new keyword
+                                        attrMap[kw] = [leaf.nid];
+                                    } else { // existing keyword
+                                        attrMap[kw].push(leaf.nid);
+                                    }
+                                }
+                            }
+                            // if the entry is empty, just skip
+                        }
+                    }
+                }
 
                 // construct hierarchical structure
                 if (!hierarchy[d.name]) {
@@ -116,6 +144,9 @@ d3.json(filePath, function(error, data) {
                 }
             });
         }
+
+        console.log(hierarchy);
+        console.log(relationships);
 
         for (var secondlvlKey in hierarchy) {
             var secondlvlNodes = {
@@ -141,8 +172,10 @@ d3.json(filePath, function(error, data) {
     function collapse(d) {
         if (d.children) {
             d._children = d.children;
-            d._children.forEach(collapse);
             d.children = null;
+        } else {
+            d.children = d._children;
+            d._children = null;
         }
     }
 
@@ -153,7 +186,7 @@ d3.json(filePath, function(error, data) {
 
         // Normalize for fixed-depth.
         nodes.forEach(function(d) {
-            d.y = d.depth * 180;
+            d.y = d.depth * DEPTH_FACTOR;
         });
 
         // Update the nodes…
@@ -180,12 +213,12 @@ d3.json(filePath, function(error, data) {
         nodeEnter.append("text")
             .attr("x", function(d) {
                 //return d.children || d._children ? -10 : 10;
-                return 0;
+                return -8;
             })
             .attr("y", function(d) {
-                return -10;
+                return 2;
             })
-            //.attr("dy", ".55em")
+            // .attr("dy", ".35em")
             .attr("text-anchor", function(d) {
                 //return d.children || d._children ? "end" : "start";
                 return "end"
@@ -197,7 +230,7 @@ d3.json(filePath, function(error, data) {
 
         // Transition nodes to their new position.
         var nodeUpdate = node.transition()
-            .duration(duration)
+            .duration(DURATION)
             .attr("transform", function(d) {
                 return "translate(" + d.y + "," + d.x + ")";
             });
@@ -213,7 +246,7 @@ d3.json(filePath, function(error, data) {
 
         // Transition exiting nodes to the parent's new position.
         var nodeExit = node.exit().transition()
-            .duration(duration)
+            .duration(DURATION)
             .attr("transform", function(d) {
                 return "translate(" + source.y + "," + source.x + ")";
             })
@@ -247,12 +280,12 @@ d3.json(filePath, function(error, data) {
 
         // Transition links to their new position.
         link.transition()
-            .duration(duration)
+            .duration(DURATION)
             .attr("d", diagonal);
 
         // Transition exiting nodes to the parent's new position.
         link.exit().transition()
-            .duration(duration)
+            .duration(DURATION)
             .attr("d", function(d) {
                 var o = {
                     x: source.x,
@@ -270,6 +303,22 @@ d3.json(filePath, function(error, data) {
             d.x0 = d.x;
             d.y0 = d.y;
         });
+    }
+
+    function expand(d){
+        var children = (d.children)?d.children:d._children;
+
+        if (d._children) {
+            d.children = d._children;
+            d._children = null;
+        }
+
+        if(children) children.forEach(expand);
+    }
+
+    function expandAll() {
+        expand(root);
+        update(root);
     }
 
     // Toggle children on click.
@@ -290,3 +339,11 @@ d3.json(filePath, function(error, data) {
         return nid;
     }
 });
+
+//Redraw for zoom
+function redraw() {
+    //console.log("here", d3.event.translate, d3.event.scale);
+    svg.attr("transform",
+        "translate(" + d3.event.translate + ")" +
+        " scale(" + d3.event.scale + ")");
+}

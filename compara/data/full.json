@@ -96,7 +96,7 @@
       "name":"Urban Design and Planning Software",
       "children":[
         {
-          "name":"Vectorworks - Fundamentals, Architect, Landmark, Renderworks,  Spotlight, ESP Vision",
+          "name":"Vectorworks",
           "User Type":"designer, architect, engineer, urban planner",
           "Tasks":"navigation, visualization, exploration      "
         }
@@ -186,21 +186,6 @@
       "name":"Urban Design and Planning Software",
       "children":[
         {
-          "name":"",
-          "User Type":"",
-          "Tasks":""
-        }
-      ]
-    }
-  ]
-},
-{
-  "name":"Urban Design - Built Environment, neighbourhood planning ",
-  "children":[
-    {
-      "name":"Urban Design and Planning Software",
-      "children":[
-        {
           "name":"StreetFactory",
           "User Type":"urban planner, risk management, defence, telecommunications, surveyor, GIS, location-based services",
           "Tasks":"design visualization navigation exploration"
@@ -231,7 +216,7 @@
       "name":"Design Software",
       "children":[
         {
-          "name":"Solid WORKS / Dassault Syst�mes ",
+          "name":"Solid WORKS / Dassault Systemes ",
           "User Type":"product designer, concept development, visualization, 3D rendering, CAM",
           "Tasks":"navigation, 2D & 3D visualization, exploration, coordination"
         }
@@ -276,7 +261,7 @@
       "name":"Maps & Surveys, property data",
       "children":[
         {
-          "name":"ESRI CityEngine�",
+          "name":"ESRI CityEngine",
           "User Type":"AEC",
           "Tasks":"planning"
         }
@@ -876,7 +861,7 @@
       "name":"civic engagement",
       "children":[
         {
-          "name":"Designing �Tomorrowland�",
+          "name":"Designing Tomorrowland",
           "User Type":"researcher",
           "Tasks":""
         }
@@ -915,7 +900,7 @@
   ]
 },
 {
-  "name":"Infrastructure Management, Sustainability, and Resilient cities�",
+  "name":"Infrastructure Management, Sustainability, and Resilient cities",
   "children":[
     {
       "name":"Infrastructure Management",
@@ -930,7 +915,7 @@
   ]
 },
 {
-  "name":"Infrastructure Management, Sustainability, and Resilient cities�",
+  "name":"Infrastructure Management, Sustainability, and Resilient cities",
   "children":[
     {
       "name":"Infrastructure Management",
@@ -945,7 +930,7 @@
   ]
 },
 {
-  "name":"Infrastructure Management, Sustainability, and Resilient cities�",
+  "name":"Infrastructure Management, Sustainability, and Resilient cities",
   "children":[
     {
       "name":"Infrastructure Management",
