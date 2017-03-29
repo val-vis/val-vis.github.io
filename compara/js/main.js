@@ -10,6 +10,9 @@ const WIDTH = 2000;
 const HEIGHT = 1200;
 const DURATION = 400;
 const ZOOM_MAX = 8;
+const SIDE_X = 900;
+const SIDE_Y = 200;
+const SIDE_VERT_DIST = 20;
 
 var margin = {
         top: 20,
@@ -32,21 +35,60 @@ var diagonal = d3.svg.diagonal()
         return [d.y, d.x];
     });
 
+var c10 = d3.scale.category10();
+
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.right + margin.left)
     .attr("height", height + margin.top + margin.bottom)
     .call(zm = d3.behavior.zoom().scaleExtent([1,ZOOM_MAX]).on("zoom", redraw)) // zoom
     .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    ;
 
 //necessary so that zoom knows where to zoom and unzoom from
 zm.translate([350, 20]);
 
 var nid = 1; // node id
+var aid = 1; // attribute node id
 var relationships = {};
+
+var sideLinks = [];
+
+var attrOptions = [];
+var selectedAttr = "";
 
 d3.json(filePath, function(error, data) {
     if (error) throw error;
+
+    // initialize attribute options
+    var firstEle = data[0].children[0].children[0];
+
+    for (var ele in firstEle) {
+        if (ele !== "name") {
+            attrOptions.push(ele);
+        }
+    }
+
+    if (attrOptions.length > 0) {
+        selectedAttr = attrOptions[0];
+    }
+
+    // init UI
+    var select = d3.select('body')
+        .append('select')
+        .attr('class','select ui-options')
+        .on('change',onchange);
+
+    var options = select
+        .selectAll('option')
+        .data(attrOptions).enter()
+        .append('option')
+        .text(function (d) { return d; });
+
+    function onchange() {
+        selectedAttr = d3.select('select').property('value')
+        expandAll(selectedAttr);
+    };
 
     root = {
         "name": "Comparative Toolsets",
@@ -57,9 +99,7 @@ d3.json(filePath, function(error, data) {
     root.x0 = height / 2;
     root.y0 = 0;
 
-    expandAll();
-    // root.children.forEach(collapse);
-    // update(root);
+    expandAll(selectedAttr);
 
     d3.select(self.frameElement).style("height", "800px");
 
@@ -146,8 +186,11 @@ d3.json(filePath, function(error, data) {
             });
         }
 
-        console.log(hierarchy);
-        console.log(relationships);
+        // generate dropdown options
+        attrOptions = Object.keys(relationships);
+
+        // console.log(hierarchy);
+        // console.log(relationships);
 
         for (var secondlvlKey in hierarchy) {
             var secondlvlNodes = {
@@ -180,7 +223,19 @@ d3.json(filePath, function(error, data) {
         }
     }
 
-    function update(source) {
+    /*
+        Node (leaf)
+        {
+            id
+            depth
+            name
+            nid
+            parent:{}
+            x
+            y
+        }
+    */
+    function update(source, attr) {
         // Compute the new tree layout.
         var nodes = tree.nodes(root).reverse(),
             links = tree.links(nodes);
@@ -199,10 +254,11 @@ d3.json(filePath, function(error, data) {
         // Enter any new nodes at the parent's previous position.
         var nodeEnter = node.enter().append("g")
             .attr("class", "node")
-            .attr("transform", function(d) {
-                return "translate(" + source.y0 + "," + source.x0 + ")";
-            })
-            .on("click", click);
+            // .attr("transform", function(d) {
+            //     return "translate(" + source.y0 + "," + source.x0 + ")";
+            // })
+            // .on("click", click)
+            ;
 
         nodeEnter.append("circle")
             .attr("r", 1e-6)
@@ -230,11 +286,14 @@ d3.json(filePath, function(error, data) {
             .style("fill-opacity", 1e-6);
 
         // Transition nodes to their new position.
-        var nodeUpdate = node.transition()
-            .duration(DURATION)
+        var nodeUpdate = node
+            // .transition()
+            // .duration(DURATION)
             .attr("transform", function(d) {
+
                 return "translate(" + d.y + "," + d.x + ")";
-            });
+            })
+            ;
 
         nodeUpdate.select("circle")
             .attr("r", 4.5)
@@ -246,11 +305,12 @@ d3.json(filePath, function(error, data) {
             .style("fill-opacity", 1);
 
         // Transition exiting nodes to the parent's new position.
-        var nodeExit = node.exit().transition()
-            .duration(DURATION)
-            .attr("transform", function(d) {
-                return "translate(" + source.y + "," + source.x + ")";
-            })
+        var nodeExit = node.exit()
+            // .transition()
+            // .duration(DURATION)
+            // .attr("transform", function(d) {
+            //     return "translate(" + source.y + "," + source.x + ")";
+            // })
             .remove();
 
         nodeExit.select("circle")
@@ -280,30 +340,169 @@ d3.json(filePath, function(error, data) {
             });
 
         // Transition links to their new position.
-        link.transition()
-            .duration(DURATION)
+        link
+            // .transition()
+            // .duration(DURATION)
             .attr("d", diagonal);
 
         // Transition exiting nodes to the parent's new position.
-        link.exit().transition()
-            .duration(DURATION)
-            .attr("d", function(d) {
-                var o = {
-                    x: source.x,
-                    y: source.y
-                };
-                return diagonal({
-                    source: o,
-                    target: o
-                });
-            })
-            .remove();
+        // link.exit()
+        //     // .transition()
+        //     // .duration(DURATION)
+        //     .attr("d", function(d) {
+        //         var o = {
+        //             x: source.x,
+        //             y: source.y
+        //         };
+        //         return diagonal({
+        //             source: o,
+        //             target: o
+        //         });
+        //     })
+        //     .remove();
 
         // Stash the old positions for transition.
-        nodes.forEach(function(d) {
-            d.x0 = d.x;
-            d.y0 = d.y;
+
+        // update position after transform
+        // nodes.forEach(function(d) {
+        //     d.x = d.x+source.x0;
+        //     d.y = d.y+source.y0;
+        // });
+
+        /* Render nodes of taxonomy attributes from relationships */
+        // select the first attribute by default
+        buildSideGraphData(nodes, attr);
+
+        if (sideLinks.length > 0) {
+            renderSideGraph(nodes, sideLinks);
+        }
+
+        // console.log(sideGraph);
+    }
+
+    function resetSideGraph() {
+        d3.selectAll(".sideLink").remove();
+        d3.selectAll(".sideNode").remove();
+        sideLinks = [];
+    }
+
+    // construct node-link data for the relationships between software and attributes
+    // nodes are from existing tree
+    function buildSideGraphData(nodes, attr) {
+        // console.log(nodes);
+
+        var selectedGroup = relationships[attr];
+
+        // generate nodes for selected attribute
+        var sideNodeNames = Object.keys(selectedGroup);
+
+        // sort in natural order
+        sideNodeNames.sort(function(a, b) {
+            return naturalSort(a, b, { insensitive: true });
         });
+
+        var startY = SIDE_Y;
+
+        for (var i in sideNodeNames) {
+            startY += SIDE_VERT_DIST;
+            var sideNode = {
+                name: sideNodeNames[i],
+                aid: aid++,
+                type: "attribute",
+                x: SIDE_X,
+                y: startY
+            };
+
+            nodes.push(sideNode);
+        }
+
+        // generate links for selected attribute
+        // source: names of nodes that are of type attribute
+        // target: id of software
+        for (var key in selectedGroup) {
+            var targetNode = nodes.find(function(d) {
+                return (d.name === key) && (d.type === "attribute");
+            });
+
+            for (var j in selectedGroup[key]) {
+                var sourceNode = nodes.find(function(d) {
+                    return d.nid === selectedGroup[key][j];
+                });
+
+                var link = {
+                    // source: key,
+                    // target: selectedGroup[key][j]
+                    source: sourceNode,
+                    target: targetNode
+                };
+
+                sideLinks.push(link);
+            }
+        }
+
+        // console.log(sideLinks);
+    }
+
+    function renderSideGraph(nodes, links) {
+        resetSideGraph();
+
+        var sideGraphData = nodes.filter(function(d) {
+            return d.type === "attribute";
+        });
+
+        // construct nodes
+        var sideNode = svg.selectAll("g.sideNode")
+            .data(sideGraphData);
+
+        var sideNodeEnter = sideNode.enter().append("g");
+
+        sideNodeEnter.attr("class", "sideNode")
+            .append("circle")
+            .attr("cx", function(d) {
+                return d.x
+            })
+            .attr("cy", function(d) {
+                return d.y
+            })
+            .attr("r", 6)
+            .attr("fill", function(d, i) {
+                return "#fff";
+            });
+
+        sideNodeEnter.append("text")
+            .attr("x", function(d) {
+                //return d.children || d._children ? -10 : 10;
+                return d.x+12;
+            })
+            .attr("y", function(d) {
+                return d.y+4;
+            })
+            .attr("text-anchor", function(d) {
+                //return d.children || d._children ? "end" : "start";
+                return "start"
+            })
+            .text(function(d) {
+                return d.name;
+            })
+            ;
+
+        var sideLink = svg.selectAll("link")
+            .data(links);
+
+        var sideLinkEnter = sideLink.enter()
+            .append("line");
+
+        sideLinkEnter.attr("class", "sideLink")
+            .attr("x1", function(l) {
+                // the source x is actually y, y is x
+                d3.select(this).attr("y1", l.source.x);
+                return l.source.y;
+            })
+            .attr("x2", function(l) {
+                d3.select(this).attr("y2", l.target.y);
+                return l.target.x;
+            })
+            ;
     }
 
     function expand(d){
@@ -317,9 +516,9 @@ d3.json(filePath, function(error, data) {
         if(children) children.forEach(expand);
     }
 
-    function expandAll() {
+    function expandAll(attr) {
         expand(root);
-        update(root);
+        update(root, attr);
     }
 
     // Toggle children on click.
@@ -347,4 +546,55 @@ function redraw() {
     svg.attr("transform",
         "translate(" + d3.event.translate + ")" +
         " scale(" + d3.event.scale + ")");
+}
+
+/*
+ * Natural Sort algorithm for Javascript - Version 0.8.1 - Released under MIT license
+ * Author: Jim Palmer (based on chunking idea from Dave Koelle)
+ */
+naturalSort = function (a, b) {
+    var re = /(^([+\-]?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?(?=\D|\s|$))|^0x[\da-fA-F]+$|\d+)/g,
+        sre = /^\s+|\s+$/g,   // trim pre-post whitespace
+        snre = /\s+/g,        // normalize all whitespace to single ' ' character
+        dre = /(^([\w ]+,?[\w ]+)?[\w ]+,?[\w ]+\d+:\d+(:\d+)?[\w ]?|^\d{1,4}[\/\-]\d{1,4}[\/\-]\d{1,4}|^\w+, \w+ \d+, \d{4})/,
+        hre = /^0x[0-9a-f]+$/i,
+        ore = /^0/,
+        i = function(s) {
+            return (naturalSort.insensitive && ('' + s).toLowerCase() || '' + s).replace(sre, '');
+        },
+        // convert all to strings strip whitespace
+        x = i(a),
+        y = i(b),
+        // chunk/tokenize
+        xN = x.replace(re, '\0$1\0').replace(/\0$/,'').replace(/^\0/,'').split('\0'),
+        yN = y.replace(re, '\0$1\0').replace(/\0$/,'').replace(/^\0/,'').split('\0'),
+        // numeric, hex or date detection
+        xD = parseInt(x.match(hre), 16) || (xN.length !== 1 && Date.parse(x)),
+        yD = parseInt(y.match(hre), 16) || xD && y.match(dre) && Date.parse(y) || null,
+        normChunk = function(s, l) {
+            // normalize spaces; find floats not starting with '0', string or 0 if not defined (Clint Priest)
+            return (!s.match(ore) || l == 1) && parseFloat(s) || s.replace(snre, ' ').replace(sre, '') || 0;
+        },
+        oFxNcL, oFyNcL;
+    // first try and sort Hex codes or Dates
+    if (yD) {
+        if (xD < yD) { return -1; }
+        else if (xD > yD) { return 1; }
+    }
+    // natural sorting through split numeric strings and default strings
+    for(var cLoc = 0, xNl = xN.length, yNl = yN.length, numS = Math.max(xNl, yNl); cLoc < numS; cLoc++) {
+        oFxNcL = normChunk(xN[cLoc] || '', xNl);
+        oFyNcL = normChunk(yN[cLoc] || '', yNl);
+        // handle numeric vs string comparison - number < string - (Kyle Adams)
+        if (isNaN(oFxNcL) !== isNaN(oFyNcL)) {
+            return isNaN(oFxNcL) ? 1 : -1;
+        }
+        // if unicode use locale comparison
+        if (/[^\x00-\x80]/.test(oFxNcL + oFyNcL) && oFxNcL.localeCompare) {
+            var comp = oFxNcL.localeCompare(oFyNcL);
+            return comp / Math.abs(comp);
+        }
+        if (oFxNcL < oFyNcL) { return -1; }
+        else if (oFxNcL > oFyNcL) { return 1; }
+    }
 }

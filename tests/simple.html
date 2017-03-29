@@ -1,0 +1,97 @@
+<!-- python -m SimpleHTTPServer 8080 //-->
+<!-- TODO: Convert reusable chart approach. //-->
+
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>CS 360 Data Visualization</title>
+
+<!-- JavaScript Libraries //-->
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<!-- CSS Style //-->
+<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,900|Source+Code+Pro:300" rel="stylesheet" type="text/css">
+<link href="style.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+    <script>
+    var data = {
+       nodes: [{
+         name: "A",
+         x: 200,
+         y: 150
+       }, {
+         name: "B",
+         x: 200,
+         y: 300
+       }, {
+         name: "C",
+         x: 400,
+         y: 150
+       }, {
+         name: "D",
+         x: 400,
+         y: 300
+       }],
+       links: [{
+         source: 0,
+         target: 2
+       }, {
+         source: 1,
+         target: 2
+       }, {
+         source: 1,
+         target: 3
+       }, ]
+     };
+
+     var c10 = d3.scale.category10();
+     var svg = d3.select("body")
+       .append("svg")
+       .attr("width", 1200)
+       .attr("height", 800);
+
+     var links = svg.selectAll("link")
+       .data(data.links)
+       .enter()
+       .append("line")
+       .attr("class", "link")
+       .attr("x1", function(l) {
+         var sourceNode = data.nodes.filter(function(d, i) {
+           return i == l.source
+         })[0];
+         d3.select(this).attr("y1", sourceNode.y);
+         return sourceNode.x
+       })
+       .attr("x2", function(l) {
+         var targetNode = data.nodes.filter(function(d, i) {
+           return i == l.target
+         })[0];
+         d3.select(this).attr("y2", targetNode.y);
+         return targetNode.x
+       })
+       .attr("fill", "none")
+       .attr("stroke", "white");
+
+     var nodes = svg.selectAll("node")
+       .data(data.nodes)
+       .enter()
+       .append("circle")
+       .attr("class", "node")
+       .attr("cx", function(d) {
+         return d.x
+       })
+       .attr("cy", function(d) {
+         return d.y
+       })
+       .attr("r", 15)
+       .attr("fill", function(d, i) {
+         return c10(i);
+       })
+    //    .call(drag)
+       ;
+    </script>
+</body>
+</html>

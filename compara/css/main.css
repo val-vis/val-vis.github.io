@@ -12,8 +12,32 @@
   font: 8px sans-serif;
 }
 
+.sideNode circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.sideNode text {
+  font: 12px sans-serif;
+}
+
 .link {
   fill: none;
   stroke: #ccc;
   stroke-width: 1.5px;
+}
+
+.sideLink {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
+
+.ui-options {
+    position: fixed;
+    top: 20px;
+    right: 200px;
+    width: 200px;
+    height: 60px;
 }
