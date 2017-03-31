@@ -257,7 +257,9 @@ d3.json(filePath, function(error, data) {
             // .attr("transform", function(d) {
             //     return "translate(" + source.y0 + "," + source.x0 + ")";
             // })
-            // .on("click", click)
+            .on("mouseover", nodeMouseover)
+            .on("click", nodeClick)
+            .on("mouseout", mouseout)
             ;
 
         nodeEnter.append("circle")
@@ -290,7 +292,6 @@ d3.json(filePath, function(error, data) {
             // .transition()
             // .duration(DURATION)
             .attr("transform", function(d) {
-
                 return "translate(" + d.y + "," + d.x + ")";
             })
             ;
@@ -306,11 +307,6 @@ d3.json(filePath, function(error, data) {
 
         // Transition exiting nodes to the parent's new position.
         var nodeExit = node.exit()
-            // .transition()
-            // .duration(DURATION)
-            // .attr("transform", function(d) {
-            //     return "translate(" + source.y + "," + source.x + ")";
-            // })
             .remove();
 
         nodeExit.select("circle")
@@ -341,43 +337,22 @@ d3.json(filePath, function(error, data) {
 
         // Transition links to their new position.
         link
-            // .transition()
-            // .duration(DURATION)
             .attr("d", diagonal);
-
-        // Transition exiting nodes to the parent's new position.
-        // link.exit()
-        //     // .transition()
-        //     // .duration(DURATION)
-        //     .attr("d", function(d) {
-        //         var o = {
-        //             x: source.x,
-        //             y: source.y
-        //         };
-        //         return diagonal({
-        //             source: o,
-        //             target: o
-        //         });
-        //     })
-        //     .remove();
-
-        // Stash the old positions for transition.
-
-        // update position after transform
-        // nodes.forEach(function(d) {
-        //     d.x = d.x+source.x0;
-        //     d.y = d.y+source.y0;
-        // });
 
         /* Render nodes of taxonomy attributes from relationships */
         // select the first attribute by default
         buildSideGraphData(nodes, attr);
 
         if (sideLinks.length > 0) {
+            // highlight nodes without any connections
+            svg.selectAll(".node").classed("noLink", function(d){
+                return !sideLinks.find(function(l) {
+                    return d.name === l.source.name;
+                });
+            });
+
             renderSideGraph(nodes, sideLinks);
         }
-
-        // console.log(sideGraph);
     }
 
     function resetSideGraph() {
@@ -440,8 +415,6 @@ d3.json(filePath, function(error, data) {
                 sideLinks.push(link);
             }
         }
-
-        // console.log(sideLinks);
     }
 
     function renderSideGraph(nodes, links) {
@@ -458,6 +431,9 @@ d3.json(filePath, function(error, data) {
         var sideNodeEnter = sideNode.enter().append("g");
 
         sideNodeEnter.attr("class", "sideNode")
+            .on("mouseover", sideNodeMouseover)
+            .on("click", sideNodeClick)
+            .on("mouseout", mouseout)
             .append("circle")
             .attr("cx", function(d) {
                 return d.x
@@ -505,38 +481,78 @@ d3.json(filePath, function(error, data) {
                 return l.target.x;
             })
             .on("mouseover", sideLinkMouseover)
-            .on("click", sideLinkMouseclick)
+            .on("click", sideLinkClick)
             .on("mouseout", mouseout)
             ;
     }
 
+    /* Mouse Event */
+    function resetSelection() {
+        svg.selectAll(".node").classed("selected", false);
+        svg.selectAll(".sideNode").classed("selected", false);
+        svg.selectAll(".sideLink").classed("selected", false);
+    }
+
+    /* Events for leafs of the tree (software) */
+    function nodeMouseover(d) {
+        svg.selectAll(".sideLink").classed("active", function(p) {
+            return p.source.name === d.name;
+        });
+        d3.select(this).classed("active", true);
+    }
+
+    function nodeClick(d) {
+        resetSelection();
+        svg.selectAll(".sideLink").classed("selected", function(p) {
+            return p.source.name === d.name;
+        });
+        d3.select(this).classed("selected", true);
+    }
+
+    /* Events for side nodes (attribute) */
+    function sideNodeMouseover(d) {
+        svg.selectAll(".sideLink").classed("active", function(p) {
+            return p.target.name === d.name;
+        });
+        d3.select(this).classed("active", true);
+    }
+
+    function sideNodeClick(d) {
+        resetSelection();
+        svg.selectAll(".sideLink").classed("selected", function(p) {
+            return p.target.name === d.name;
+        });
+        d3.select(this).classed("selected", true);
+    }
+
+    /* Events for links between software and attribute nodes */
     function sideLinkMouseover(d) {
         svg.selectAll(".sideLink")
             .classed("active", function(p) {
                 return p === d;
             });
-        svg.selectAll(".node circle")
+        svg.selectAll(".node")
                 .classed("active", function(p) {
                 return (p.name === d.source.name) || (p.name === d.target.name);
             });
 
-        svg.selectAll(".sideNode circle")
+        svg.selectAll(".sideNode")
                 .classed("active", function(p) {
                 return (p.name === d.source.name) || (p.name === d.target.name);
             });
     }
 
-    function sideLinkMouseclick(d) {
+    function sideLinkClick(d) {
         svg.selectAll(".sideLink")
             .classed("selected", function(p) {
                 return p === d;
             });
-        svg.selectAll(".node circle")
+        svg.selectAll(".node")
                 .classed("selected", function(p) {
                 return (p.name === d.source.name) || (p.name === d.target.name);
             });
 
-        svg.selectAll(".sideNode circle")
+        svg.selectAll(".sideNode")
                 .classed("selected", function(p) {
                 return (p.name === d.source.name) || (p.name === d.target.name);
             });
@@ -544,11 +560,6 @@ d3.json(filePath, function(error, data) {
 
     function mouseout(d) {
         svg.selectAll(".active").classed("active", false);
-    }
-
-    function sideNodeMouseover(d) {
-        svg.selectAll(".link").classed("active", function(p) { return p.source === d || p.target === d; });
-        d3.select(this).classed("active", true);
     }
 
     function expand(d){

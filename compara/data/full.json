@@ -546,21 +546,6 @@
       "name":"Public",
       "children":[
         {
-          "name":"IBM IoT",
-          "User Type":"transportation engineer, technician",
-          "Tasks":"operations, planning"
-        }
-      ]
-    }
-  ]
-},
-{
-  "name":"Transportation",
-  "children":[
-    {
-      "name":"Public",
-      "children":[
-        {
           "name":"Pantonium",
           "User Type":"",
           "Tasks":""
@@ -981,22 +966,7 @@
       "name":"Big Data & Analysis",
       "children":[
         {
-          "name":"Big Data",
-          "User Type":"urban planner, engineer, artist",
-          "Tasks":""
-        }
-      ]
-    }
-  ]
-},
-{
-  "name":"Big Data & Analysis",
-  "children":[
-    {
-      "name":"Big Data & Analysis",
-      "children":[
-        {
-          "name":"Watson Internet of Things IOT Data",
+          "name":"Watson Analytics",
           "User Type":"analyst, architect, real estate developer",
           "Tasks":""
         }

@@ -1,5 +1,20 @@
+.ui-options {
+    position: fixed;
+    top: 20px;
+    right: 200px;
+    width: 200px;
+    height: 60px;
+}
+
+/* on select: #d62728 */
+/* on hover: #e4838C */
+
 .node {
   cursor: pointer;
+}
+
+.node.noLink circle {
+    stroke: #999;
 }
 
 .node circle {
@@ -12,6 +27,23 @@
   font: 8px sans-serif;
 }
 
+.node.active circle{
+    stroke: #e4838C;
+}
+
+.node.active text {
+    cursor: pointer;
+    fill: #e4838C;
+}
+
+.node.selected circle{
+    stroke: #d62728;
+}
+
+.node.selected text {
+    fill: #d62728;
+}
+
 .sideNode circle {
   fill: #fff;
   stroke: steelblue;
@@ -22,6 +54,23 @@
   font: 12px sans-serif;
 }
 
+.sideNode.active circle{
+    stroke: #e4838C;
+}
+
+.sideNode.active text {
+    cursor: pointer;
+    fill: #e4838C;
+}
+
+.sideNode.selected circle{
+    stroke: #d62728;
+}
+
+.sideNode.selected text {
+    fill: #d62728;
+}
+
 .link {
   fill: none;
   stroke: #ccc;
@@ -30,32 +79,19 @@
 
 .sideLink {
   fill: none;
-  stroke: #ccc;
-  stroke-width: .8px;
+  stroke: #999;
+  stroke-width: 1.2px;
+  stroke-opacity: .3;
 }
 
-.active {
-    stroke: red;
+.sideLink.active {
+    stroke: #e4838C;
     stroke-width: 2px;
+    stroke-opacity: .8;
 }
 
-circle.active {
-    stroke: red;
-}
-
-.selected {
-    stroke: red;
+.sideLink.selected {
+    stroke: #d62728;
     stroke-width: 2px;
-}
-
-circle.selected {
-    stroke: red;
-}
-
-.ui-options {
-    position: fixed;
-    top: 20px;
-    right: 200px;
-    width: 200px;
-    height: 60px;
+    stroke-opacity: .8;
 }
