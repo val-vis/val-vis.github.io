@@ -6,12 +6,12 @@ var filePath = "data/full.json";
 /* Initial config */
 
 const DEPTH_FACTOR = 200; // link distance
-const WIDTH = 2000;
-const HEIGHT = 1200;
+const WIDTH = window.innerWidth;
+const HEIGHT = window.innerHeight;
 const DURATION = 400;
 const ZOOM_MAX = 8;
 const SIDE_X = 900;
-const SIDE_Y = 200;
+const SIDE_Y = 100;
 const SIDE_VERT_DIST = 20;
 
 var margin = {
@@ -398,7 +398,8 @@ d3.json(filePath, function(error, data) {
 
         // sort in natural order
         sideNodeNames.sort(function(a, b) {
-            return naturalSort(a, b, { insensitive: true });
+            // return naturalSort(a, b, { insensitive: true });
+            return selectedGroup[b].length - selectedGroup[a].length;
         });
 
         var startY = SIDE_Y;
@@ -486,6 +487,7 @@ d3.json(filePath, function(error, data) {
             })
             ;
 
+        // draw links
         var sideLink = svg.selectAll("link")
             .data(links);
 
@@ -502,7 +504,51 @@ d3.json(filePath, function(error, data) {
                 d3.select(this).attr("y2", l.target.y);
                 return l.target.x;
             })
+            .on("mouseover", sideLinkMouseover)
+            .on("click", sideLinkMouseclick)
+            .on("mouseout", mouseout)
             ;
+    }
+
+    function sideLinkMouseover(d) {
+        svg.selectAll(".sideLink")
+            .classed("active", function(p) {
+                return p === d;
+            });
+        svg.selectAll(".node circle")
+                .classed("active", function(p) {
+                return (p.name === d.source.name) || (p.name === d.target.name);
+            });
+
+        svg.selectAll(".sideNode circle")
+                .classed("active", function(p) {
+                return (p.name === d.source.name) || (p.name === d.target.name);
+            });
+    }
+
+    function sideLinkMouseclick(d) {
+        svg.selectAll(".sideLink")
+            .classed("selected", function(p) {
+                return p === d;
+            });
+        svg.selectAll(".node circle")
+                .classed("selected", function(p) {
+                return (p.name === d.source.name) || (p.name === d.target.name);
+            });
+
+        svg.selectAll(".sideNode circle")
+                .classed("selected", function(p) {
+                return (p.name === d.source.name) || (p.name === d.target.name);
+            });
+    }
+
+    function mouseout(d) {
+        svg.selectAll(".active").classed("active", false);
+    }
+
+    function sideNodeMouseover(d) {
+        svg.selectAll(".link").classed("active", function(p) { return p.source === d || p.target === d; });
+        d3.select(this).classed("active", true);
     }
 
     function expand(d){

@@ -31,7 +31,25 @@
 .sideLink {
   fill: none;
   stroke: #ccc;
-  stroke-width: 1.5px;
+  stroke-width: .8px;
+}
+
+.active {
+    stroke: red;
+    stroke-width: 2px;
+}
+
+circle.active {
+    stroke: red;
+}
+
+.selected {
+    stroke: red;
+    stroke-width: 2px;
+}
+
+circle.selected {
+    stroke: red;
 }
 
 .ui-options {
