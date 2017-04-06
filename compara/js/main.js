@@ -348,7 +348,7 @@ d3.json(filePath, function(error, data) {
             svg.selectAll(".node").classed("noLink", function(d){
                 return !sideLinks.find(function(l) {
                     return d.name === l.source.name;
-                });
+                }) && (!d.children);
             });
 
             renderSideGraph(nodes, sideLinks);
@@ -495,6 +495,15 @@ d3.json(filePath, function(error, data) {
 
     /* Events for leafs of the tree (software) */
     function nodeMouseover(d) {
+        // if (d.children) {
+        //     for (var childIndex in d.children) {
+        //         // if it's a leaf
+        //         if (!d.children[childIndex].children) {
+        //             nodeMouseover(d.children[childIndex]);
+        //         }
+        //     }
+        // }
+
         svg.selectAll(".sideLink").classed("active", function(p) {
             return p.source.name === d.name;
         });
